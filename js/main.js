@@ -136,7 +136,7 @@
     if ('IntersectionObserver' in window) new IntersectionObserver((en) => { live = en[0].isIntersecting; }).observe(box);
   }
 
-  /** "Right now I'm …" typewriter (just swaps the text when motion is reduced). */
+  /** "Right now I'm …" typewriter: erases and types each phrase letter by letter. */
   function typer() {
     const el = $('#typer'), words = P.doing;
     if (!el || !words || words.length < 2) return;
@@ -144,7 +144,6 @@
     const next = () => {
       w = (w + 1) % words.length;
       const word = words[w];
-      if (HOS.reduced()) { el.textContent = word; setTimeout(next, 3200); return; }
       const type = (i) => {
         el.textContent = word.slice(0, i);
         if (i < word.length) setTimeout(() => type(i + 1), 55);
@@ -550,16 +549,21 @@
   /* ---------- "Does Hannah fit your stack?" ---------- */
   function renderMatch() {
     $('#sk-match').innerHTML =
-      '<header class="skm__head"><span class="tile__icon" data-tint="green">' + icon('checkCircle') + '</span>' +
-        '<div><h3 id="skm-title">Does Hannah fit your stack?</h3><p>Pick your team\'s tools and see where I\'ve used them.</p></div></header>' +
-      '<div class="skm__body"><div class="skm__left">' +
-      '<p class="skm__label">Quick stacks</p>' +
-      '<div class="skm__presets">' + PRESETS.map((p, i) =>
-        '<button class="skm__preset" type="button" data-preset="' + i + '">' + icon(p.icon) + esc(p.name) + '</button>').join('') + '</div>' +
-      '<p class="skm__label">Your stack <span>· add more with the box above</span></p>' +
-      '<div class="skm__tray" id="skm-tray"></div>' +
+      '<header class="skm2__head">' +
+        '<span class="tile__icon" data-tint="green">' + icon('checkCircle') + '</span>' +
+        '<div class="skm2__title"><h3 id="skm-title">Does Hannah fit your stack?</h3><p>Choose a stack or add your team\'s tools to see where she has used them.</p></div>' +
+        '<div class="skm2__score" id="skm-score"></div>' +
+      '</header>' +
+      '<div class="skm2__row">' +
+        '<p class="skm2__label">Quick stacks</p>' +
+        '<div class="skm2__presets">' + PRESETS.map((p, i) =>
+          '<button class="skm2__preset" type="button" data-preset="' + i + '">' + icon(p.icon) + '<span>' + esc(p.name) + '</span></button>').join('') + '</div>' +
       '</div>' +
-      '<div class="skm__result" id="skm-result" aria-live="polite"></div></div>';
+      '<div class="skm2__row">' +
+        '<p class="skm2__label">Your stack</p>' +
+        '<div class="skm2__tray" id="skm-tray"></div>' +
+      '</div>' +
+      '<div class="skm2__result" id="skm-result" aria-live="polite"></div>';
     $('#skm-list').innerHTML = D.skills.map((s) => '<option value="' + esc(s.name) + '"></option>').join('');
     renderStack();
   }
@@ -572,30 +576,39 @@
   }
 
   function renderStack() {
-    $('#skm-tray').innerHTML = stack.map((id) => {
-      const s = HOS.skillById(id);
-      return '<span class="tag skm__chip' + (s.dark ? ' is-dark' : '') + '">' + HOS.logo(s, { size: 16 }) + esc(s.name) +
-        '<button type="button" data-stack-del="' + id + '" aria-label="Remove ' + esc(s.name) + '">' + icon('close') + '</button></span>';
-    }).join('') + (stack.length ? '<button class="btn btn--plain btn--sm" type="button" data-stack-clear>Clear</button>' : '');
+    const preset = PRESETS.findIndex((p) => p.ids.length === stack.length && p.ids.every((id) => stack.indexOf(id) > -1));
+    $$('[data-preset]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.preset === preset)));
+    $('#skm-tray').innerHTML = stack.length
+      ? stack.map((id) => {
+          const s = HOS.skillById(id);
+          return '<span class="skm2__chip' + (s.dark ? ' is-dark' : '') + '">' + HOS.logo(s, { size: 16 }) + esc(s.name) +
+            '<button type="button" data-stack-del="' + id + '" aria-label="Remove ' + esc(s.name) + '">' + icon('close') + '</button></span>';
+        }).join('') + '<button class="skm2__clear" type="button" data-stack-clear>Clear all</button>'
+      : '<span class="skm2__none">Nothing added yet. Pick a quick stack, or type a tool in the box above.</span>';
 
-    const out = $('#skm-result');
+    const out = $('#skm-result'), score = $('#skm-score');
     if (!stack.length) {
-      out.innerHTML = '<div class="skm__empty">' + icon('layers') + '<b>Your result shows up here</b><span>Pick a quick stack or add tools on the left.</span></div>';
+      score.innerHTML = '';
+      out.innerHTML = '<div class="skm2__empty">' + icon('layers') + '<span><b>Matching projects appear here</b>Choose a stack to see the projects where those tools were used.</span></div>';
       return;
     }
     const hands = stack.filter((id) => usedIn(id));
     const pct = Math.round(hands.length / stack.length * 100);
+    score.innerHTML =
+      '<span class="skm__ring" style="--p:' + pct + '"><b>' + hands.length + '/' + stack.length + '</b></span>' +
+      '<span class="skm2__verdict"><b>' + (pct === 100 ? 'Strong match' : pct >= 50 ? 'Good match' : hands.length ? 'Partial match' : 'Coursework only') + '</b>' +
+      '<small>' + hands.length + ' of ' + stack.length + ' tools used in real projects</small></span>';
     const ranked = D.projects.map((p) => ({ p, hit: stack.filter((id) => HOS.projectsForSkill(id).indexOf(p) > -1) }))
       .filter((x) => x.hit.length).sort((a, b) => b.hit.length - a.hit.length).slice(0, 3);
-    out.innerHTML =
-      '<div class="skm__score">' +
-        '<span class="skm__ring" style="--p:' + pct + '"><b>' + hands.length + '/' + stack.length + '</b></span>' +
-        '<div><b>' + (pct === 100 ? 'Every tool used in a real project' : hands.length ? hands.length + ' of ' + stack.length + ' used in real projects' : 'Known from coursework and lab work') + '</b>' +
-        '<span>' + stack.map((id) => '<i class="skm__pip' + (usedIn(id) ? ' is-on' : '') + '" title="' + esc(HOS.skillById(id).name) + (usedIn(id) ? ': used in projects' : ': coursework') + '"></i>').join('') + '</span></div>' +
-      '</div>' +
-      (ranked.length ? '<h4 class="ps__h">Best matching projects</h4><div class="list">' + ranked.map((x) =>
-        '<button class="skd__proj" type="button" data-project="' + x.p.id + '"><img src="' + esc(x.p.cover || thumb(x.p)) + '" alt="" width="72" height="45" loading="lazy">' +
-        '<span><b>' + esc(x.p.title) + '</b><small>Uses ' + x.hit.map((id) => esc(HOS.skillById(id).name)).join(', ') + '</small></span>' + icon('next') + '</button>').join('') + '</div>' : '');
+    out.innerHTML = ranked.length
+      ? '<p class="skm2__label">Best matching projects</p><div class="skm2__projects">' + ranked.map((x) =>
+          '<button class="skm2__proj" type="button" data-project="' + x.p.id + '">' +
+            '<span class="skm2__img"><img src="' + esc(x.p.cover || thumb(x.p)) + '" alt="" loading="lazy"></span>' +
+            '<span class="skm2__pbody"><b>' + esc(x.p.title) + '</b>' +
+              '<span class="skm2__uses">' + x.hit.length + ' match' + (x.hit.length > 1 ? 'es' : '') + ' · ' + x.hit.map((id) => esc(HOS.skillById(id).name)).join(', ') + '</span>' +
+              '<span class="skm2__open">View project' + icon('next') + '</span></span>' +
+          '</button>').join('') + '</div>'
+      : '<div class="skm2__empty">' + icon('info') + '<span><b>No public project uses these yet</b>They come from coursework and lab work.</span></div>';
   }
 
   /* ---------- Orbit view: most-used skills sit closest to the center ---------- */
