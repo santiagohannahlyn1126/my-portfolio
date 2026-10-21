@@ -1336,8 +1336,8 @@
       if (wf) { flipWhy(wf.closest('.why__card')); return; }
       const es = t.closest('[data-edu-step]');
       if (es) { setEduStep(+es.dataset.eduStep); return; }
-      const pv = t.closest('[data-peek-view]');
-      if (pv) { setSkillView(pv.dataset.peekView); goto('skills'); return; }
+      const pkv = t.closest('[data-peek-view]');
+      if (pkv) { setSkillView(pkv.dataset.peekView); goto('skills'); return; }
       const pcat = t.closest('[data-peek-cat]');
       if (pcat) { skillCat = pcat.dataset.peekCat; if (skillView === 'match') skillView = 'orbit'; renderSkills(); goto('skills'); return; }
       const px = t.closest('[data-peek-xp]');
