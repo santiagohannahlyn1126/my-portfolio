@@ -125,71 +125,26 @@ window.HOS_DATA = {
     { title: 'Senior High School', org: 'With High Honors', note: 'Academic Scholar' }
   ],
 
-  /* ---- Research: approved undergraduate thesis -----------------------------
-     Public-safe summary only. Withheld on purpose: investigator identities and
-     IDs, case records, scene sketches, locations, interview transcripts,
-     consent forms and the full manuscript.
+  /* ---- Research: approved undergraduate thesis (abstract only) -------------
+     Public-safe summary. The full manuscript, investigator identities, case
+     records, scene sketches, locations and transcripts are not published.
      ------------------------------------------------------------------------ */
   research: {
     title: "Assessing Manual Investigation Challenges Affecting the TEU Investigator's Interpretation of Traffic Collision Scene Diagrams",
     short: 'Same sketch, different stories',
+    lead: 'How police investigators read hand-drawn crash sketches, and a digital tool to close the gaps.',
     kind: 'Undergraduate thesis · BS Computer Engineering · USJ-R',
     year: '2026',
     status: 'Approved',
     team: '3-member research team',
-    lead: 'How police investigators read hand-drawn crash sketches, and a digital tool to close the gaps.',
-    pitch: 'When police investigators read the same hand-drawn crash sketch, do they reach the same conclusion? We measured it and found where manual diagrams break down. Then we specified a digital tool to fix it.',
-    headline: [
-      ['67.6%', 'of interpretation problems trace to two causes: blurry sketches and missing measurements'],
-      ['25–100%', 'investigator agreement, depending on how complete the sketch was'],
-      ['8 × 6', 'investigators × archived collision scenarios, read independently']
+    // Written from the paper's own problem, method, findings and conclusion. Replace with the official abstract if you have one.
+    abstract: [
+      'Traffic collision scene diagrams are the foundation of crash investigation, yet the Traffic Enforcement Unit (TEU) of Cebu City still documents scenes with hand-drawn sketches. This study assessed how consistently TEU investigators interpret manual collision diagrams, which ambiguities they meet, and how technology could help.',
+      'Using a descriptive-evaluative, mixed-methods design, eight active investigators (three novice, five experienced) independently interpreted six archived collision scenarios and took part in an operational interview. Agreement was high (88–100%) for clear rear-end and lane-encroachment cases, but fell to 25–63% when sketches lacked dimensions, lane markings or impact points. Missing or incomplete measurements were the most cited barrier for both groups, and a Pareto analysis showed that visual clarity problems and missing measurements together explain 67.6% of interpretation failures.',
+      'The study concludes that consistency depends on documentation quality rather than seniority, and recommends an Automated Traffic Accident Diagramming System (ATADS) with vector-based rendering, enforced measurements and standardized terminology.'
     ],
-    questions: [
-      'How consistently do investigators interpret the same manual sketch?',
-      'What ambiguities and discrepancies do they find?',
-      'What challenges limit the interpretation process?',
-      'How could technology improve consistency, reliability and efficiency?'
-    ],
-    method: [
-      ['layers', 'Design', 'Descriptive-evaluative, mixed methods'],
-      ['user', 'Respondents', '8 active traffic investigators: 3 novice, 5 experienced (purposive, stratified)'],
-      ['file', 'Instrument', '6 archived collision sketches read independently, plus an operational interview'],
-      ['chart', 'Analysis', 'Consensus levels, coded ambiguity frequencies and Pareto analysis']
-    ],
-    theories: ['Human Error Theory', 'Spatial Cognition Theory', 'Technology Acceptance Model'],
-    /* Share of investigators who reached the dominant interpretation (n = 8) */
-    consensus: [
-      ['B.1', 'Car to car', 100, 'Clear rear-end collision. Every investigator agreed.'],
-      ['B.2', 'Car to car', 25, 'Lateral impact with an ambiguous sketch. Readings split into rear-end, counterflow and right-of-way stories.'],
-      ['B.3', 'Motorcycle to car', 100, 'Simple lane encroachment. Every investigator agreed.'],
-      ['B.4', 'Motorcycle to car', 63, 'Overtaking sideswipe. Missing lane detail split the readings.'],
-      ['B.5', 'Motorcycle to motorcycle', 38, 'Unclear lane order and impact points. Who was ahead could not be settled.'],
-      ['B.6', 'Motorcycle to motorcycle', 88, 'Most agreed, but experienced readers flagged missing measurements.']
-    ],
-    /* % of responses citing each barrier (novice n = 18, experienced n = 30) */
-    barriers: [
-      ['Missing or incomplete measurements', 55.56, 60.0],
-      ['Unclear vehicle positioning / trajectory', 16.67, 46.67],
-      ['Ambiguous lane or road markings', 22.22, 36.67],
-      ['Unclear damage indication', 33.33, 30.0]
-    ],
-    vitalFew: '67.6%',   // as reported in the paper (35.3% + 32.4% before rounding)
-    /* The "vital few" from the Pareto analysis → what the proposed system does about each */
-    fixes: [
-      ['image', 35.3, 'Visual clarity / blur', 'Vector-based rendering keeps lines, lanes and damage marks sharp at any zoom, from field tablet to courtroom screen.'],
-      ['sliders', 32.4, 'Missing measurements', 'Dimensioning constraints block submission until key distances such as gaps and skid marks are filled in.']
-    ],
-    solution: {
-      name: 'ATADS · Automated Traffic Accident Diagramming System',
-      points: [
-        'Step-by-step sketch protocol: orientation, roadway, vehicles, evidence, validation',
-        'Controlled vocabularies aligned with RA 4136 replace free-text slang',
-        'Drag-and-drop, to-scale symbols, including local vehicles such as jeepneys',
-        'Planned GIS overlays to anchor diagrams to real coordinates'
-      ]
-    },
-    conclusion: 'Consistency depends on how complete the sketch is, not on seniority. Manual sketches work for simple cases. Complex scenes need digital tools that enforce measurements and standard terms.',
-    privacy: 'Public summary only. Investigator identities, case records, scene sketches, locations and interview transcripts are withheld under the study\'s ethics protocol. The full manuscript is not shared publicly.'
+    keywords: ['Traffic collision investigation', 'Scene diagrams', 'Interpretation consistency', 'Human error', 'Digital documentation'],
+    privacy: 'Abstract only. Investigator identities, case records, scene sketches, locations and interview transcripts are withheld under the study\'s ethics protocol, and the full manuscript is not shared publicly.'
   },
 
   /* ---- Projects -----------------------------------------------------------
@@ -483,11 +438,31 @@ window.HOS_DATA = {
     { id: 'defects',    name: 'Defect Reporting',   cat: 'qa', glyph: 'bug', rel: ['xeleqt'] },
     { id: 'validation', name: 'Validation',         cat: 'qa', glyph: 'shield' },
 
-    // Soft skills
-    { id: 'communication', name: 'Client Communication', cat: 'soft', glyph: 'message', note: "Explaining tech fixes to Registrar's Office staff and clients" },
-    { id: 'time',          name: 'Time Management',      cat: 'soft', glyph: 'clock',   note: '4+ years of work alongside full-time studies' },
-    { id: 'detail',        name: 'Attention to Detail',  cat: 'soft', glyph: 'zoom',    note: 'Data validation and QA testing', rel: ['xeleqt'] },
-    { id: 'research',      name: 'Research & Analysis',  cat: 'soft', glyph: 'chart',   note: 'Approved thesis: mixed-methods study with consensus and Pareto analysis' }
+    // Soft skills (points: shown in the skill sheet as "What this looks like")
+    { id: 'communication', name: 'Client Communication', cat: 'soft', glyph: 'message',
+      note: "Front desk at the Office of the Registrar: catering to students, alumni and walk-in clients",
+      points: [
+        'Welcomed and assisted students, alumni, parents and walk-in clients at the registrar front desk',
+        'Guided clients through requirements, procedures and release schedules for school documents',
+        'Received, assessed and processed requests for transcripts, certifications and other records',
+        'Answered inquiries in person and in writing, and explained technical fixes in plain language to staff',
+        'Stayed calm and courteous during peak enrollment and graduation seasons'
+      ] },
+    { id: 'time',          name: 'Time Management',      cat: 'soft', glyph: 'clock',    note: '4 years of office work alongside full-time engineering studies',
+      points: ['Balanced registrar duty hours with a full Computer Engineering load from 2022 to 2026', 'Met thesis, project and office deadlines in the same terms'] },
+    { id: 'detail',        name: 'Attention to Detail',  cat: 'soft', glyph: 'zoom',     note: 'Data validation, document checks and QA testing', rel: ['xeleqt'],
+      points: ['Checked document requests against requirements before processing', 'Validated records and stock rules so errors never reach users'] },
+    { id: 'research',      name: 'Research & Analysis',  cat: 'soft', glyph: 'chart',    note: 'Approved thesis: mixed-methods study with consensus and Pareto analysis' },
+    { id: 'problem',       name: 'Problem Solving',      cat: 'soft', glyph: 'wrench',   note: 'Troubleshooting office PCs and printers, debugging robots and apps',
+      points: ['Diagnosed hardware and software issues at the registrar front desk', 'Traced and fixed bugs across firmware, circuits and web apps'] },
+    { id: 'teamwork',      name: 'Teamwork',             cat: 'soft', glyph: 'user',     note: 'Team builds: robots, smart city model, 2-person app projects and a 3-member thesis',
+      rel: ['smarthome', 'ballsort', 'trades'] },
+    { id: 'leadership',    name: 'Leadership',           cat: 'soft', glyph: 'award',    note: 'Public Information Officer, Computer Engineering Society (2024 – 2025)' },
+    { id: 'teaching',      name: 'Teaching & Mentoring', cat: 'soft', glyph: 'cap',      note: 'Taught Senior High students C programming and digital logic design' },
+    { id: 'publiccomm',    name: 'Public Communication', cat: 'soft', glyph: 'send',     note: 'Managed announcements and posts for the Computer Engineering Society' },
+    { id: 'adaptability',  name: 'Adaptability',         cat: 'soft', glyph: 'refresh',  note: 'Moves between hardware, software, QA and front-desk work' },
+    { id: 'multitasking',  name: 'Multitasking',         cat: 'soft', glyph: 'layers',   note: 'Handles queues of client requests, records and inquiries at the same time' },
+    { id: 'critical',      name: 'Critical Thinking',    cat: 'soft', glyph: 'sparkles', note: 'Questioning assumptions in testing, research and document assessment' }
   ],
 
   /* Easter egg: Recycle Bin → bugs_i_fixed.txt */

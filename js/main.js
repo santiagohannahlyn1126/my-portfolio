@@ -162,7 +162,7 @@
 
   /** Cursor-following glow on cards (mouse only). */
   function spotlight() {
-    const SPOT = '.ov-intro, .ov-stat, .why__card, .pcard, .xp, .rx-stat, .rx-chart, .edu-tile, .journey, .sk-me, .sk-match';
+    const SPOT = '.ov-intro, .ov-stat, .why__card, .pcard, .xp, .rx-abstract__body, .edu-tile, .journey, .sk-me, .sk-match';
     document.addEventListener('pointermove', (e) => {
       if (e.pointerType !== 'mouse') return;
       const el = e.target.closest && e.target.closest(SPOT);
@@ -449,7 +449,7 @@
     const frame = (now) => {
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       if (live && orbit.offsetParent) {
-        if (!HOS.reduced() && !hover && !drag) rings.forEach((_, i) => { base[i] += SPEED[i] * dt; });
+        if (!hover && !drag) rings.forEach((_, i) => { base[i] += SPEED[i] * dt; });
         if (!drag && Math.abs(vel) > 0.5) { offset += vel * dt; vel *= Math.pow(0.04, dt); }
         rings.forEach((r, i) => r.style.setProperty('--rot', (base[i] + offset).toFixed(2) + 'deg'));
       }
@@ -542,6 +542,8 @@
     }).join('') + '<div class="empty sk-empty" hidden>' + icon('search') + '<b>No skills match</b><span>Try another word, or clear the filters.</span>' +
       '<button class="btn btn--tinted btn--sm" type="button" data-skill-reset>Clear filters</button></div>';
     HOS.fillIcons($('#skill-groups'));
+    const tabs = $('#skill-tabs'), sel = $('[aria-selected="true"]', tabs);
+    if (sel) tabs.scrollLeft = Math.max(0, sel.offsetLeft - (tabs.clientWidth - sel.offsetWidth) / 2);
     setSkillView(skillView);
   }
 
@@ -597,8 +599,9 @@
         ? '<h4 class="ps__h">Where I used it</h4><div class="list">' + projs.map((p) =>
             '<button class="skd__proj" type="button" data-project="' + p.id + '"><img src="' + esc(p.cover || thumb(p)) + '" alt="" width="72" height="45" loading="lazy">' +
             '<span><b>' + esc(p.title) + '</b><small>' + esc(p.pitch) + '</small></span>' + icon('next') + '</button>').join('') + '</div>'
-        : '<div class="list"><p class="list__row">' + icon('info') + '<span>' + esc(s.note || 'Used in coursework and lab work.') + ' No public project lists it yet.</span></p></div>') +
+        : s.points ? '' : '<div class="list"><p class="list__row">' + icon('info') + '<span>' + esc(s.note || 'Used in coursework and lab work.') + ' No public project lists it yet.</span></p></div>') +
       (s.note && projs.length ? '<p class="skd__note">' + icon('info') + esc(s.note) + '</p>' : '') +
+      (s.points ? '<h4 class="ps__h">What this looks like</h4><ul class="list">' + s.points.map((x) => '<li class="list__row">' + icon('checkCircle') + '<span>' + esc(x) + '</span></li>').join('') + '</ul>' : '') +
       (paired.length ? '<h4 class="ps__h">Often paired with</h4><div class="tags">' + paired.map((t) => {
           const o = HOS.skillById(t);
           return '<button class="tag' + (o.dark ? ' is-dark' : '') + '" type="button" data-skill-open="' + t + '">' + HOS.logo(o, { size: 16 }) + esc(o.name) + '</button>';
@@ -610,12 +613,8 @@
   }
 
   /* ======================================================================
-     RESEARCH: public-safe summary of the approved thesis
+     RESEARCH: abstract of the approved thesis (public-safe)
      ====================================================================== */
-  const RX_TABS = [['agree', 'Agreement'], ['barriers', 'Barriers'], ['questions', 'Questions'], ['method', 'Method'], ['solution', 'Solution']];
-  let rxTab = 'agree', rxScn = 1, rxTable = false;
-  const pctf = (v) => (Math.round(v * 10) / 10) + '%';
-
   function renderResearch() {
     const R = D.research;
     $('#research-body').innerHTML =
@@ -624,89 +623,20 @@
         '<h2 class="sec-title" id="research-title">' + esc(R.short.replace(/, (.*)$/, ',')) + ' <span class="muted">' + esc(R.short.replace(/^.*?, /, '')) + '.</span></h2></div>' +
         '<p class="sec-lead">' + esc(R.lead) + '</p>' +
       '</header>' +
-      '<div class="rx-layout">' +
-        '<aside class="rx-aside">' +
-          '<article class="rx-paper">' +
-            '<p class="rx-paper__meta"><span class="badge-now">' + icon('checkCircle') + esc(R.status) + ' · ' + esc(R.year) + '</span>' + esc(R.kind) + '</p>' +
-            '<h3 class="rx-paper__title">' + esc(R.title) + '</h3>' +
-            '<p class="rx-paper__sub">' + esc(R.team) + '</p>' +
-          '</article>' +
-          '<div class="rx-stats">' + R.headline.map((h) => '<div class="rx-stat"><b>' + esc(h[0]) + '</b><span>' + esc(h[1]) + '</span></div>').join('') + '</div>' +
-          '<p class="rx-privacy">' + icon('lock') + '<span>' + esc(R.privacy) + '</span></p>' +
+      '<article class="rx-abstract">' +
+        '<aside class="rx-abstract__meta">' +
+          '<div class="rx-abstract__top"><span class="tile__icon" data-tint="green">' + icon('file') + '</span>' +
+            '<span class="badge-now">' + icon('checkCircle') + esc(R.status) + ' · ' + esc(R.year) + '</span></div>' +
+          '<h3 class="rx-abstract__title">' + esc(R.title) + '</h3>' +
+          '<p class="rx-abstract__kind">' + esc(R.kind) + '<br>' + esc(R.team) + '</p>' +
+          '<div class="rx-abstract__keys"><b>Keywords</b><div class="tags">' + R.keywords.map((k) => '<span class="tag tag--plain">' + esc(k) + '</span>').join('') + '</div></div>' +
         '</aside>' +
-        '<div class="rx-main">' +
-          '<div class="seg rx-tabs" role="tablist" aria-label="Research sections">' + RX_TABS.map((t) =>
-            '<button class="seg__btn" role="tab" type="button" id="rxt-' + t[0] + '" data-rx-tab="' + t[0] + '" aria-controls="rx-panel" aria-selected="' + (rxTab === t[0]) + '">' + t[1] + '</button>').join('') + '</div>' +
-          '<div class="rx-panel" id="rx-panel" role="tabpanel" aria-labelledby="rxt-' + rxTab + '"></div>' +
+        '<div class="rx-abstract__body">' +
+          '<p class="rx-abstract__label">' + icon('info') + 'Abstract</p>' +
+          R.abstract.map((p) => '<p>' + esc(p) + '</p>').join('') +
         '</div>' +
-      '</div>';
-    renderRxPanel();
-  }
-
-  function renderRxPanel() {
-    const R = D.research, el = $('#rx-panel');
-    el.setAttribute('aria-labelledby', 'rxt-' + rxTab);
-    $$('[data-rx-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.rxTab === rxTab)));
-    const tableBtn = '<button class="btn btn--tinted btn--sm" type="button" data-rx-table aria-expanded="' + rxTable + '">' + icon('grid') + (rxTable ? 'Show chart' : 'Show as table') + '</button>';
-    let html = '';
-    if (rxTab === 'agree') {
-      const s = R.consensus[rxScn];
-      html = '<figure class="rx-chart">' +
-        '<figcaption><b>How often investigators agreed</b><small>Share who reached the same reading of each sketch · 8 investigators · dashed line = majority</small></figcaption>' +
-        (rxTable
-          ? '<table class="rx-table"><thead><tr><th>Scenario</th><th>Collision</th><th>Agreed</th></tr></thead><tbody>' +
-              R.consensus.map((c) => '<tr><td>' + esc(c[0]) + '</td><td>' + esc(c[1]) + '</td><td>' + c[2] + '%</td></tr>').join('') + '</tbody></table>'
-          : '<div class="cbars">' + R.consensus.map((c, i) =>
-              '<button class="cbar" type="button" data-rx-scn="' + i + '" aria-pressed="' + (i === rxScn) + '" data-tip="' + esc(c[0] + ' · ' + c[1] + ': ' + c[2] + '% agreed') + '">' +
-                '<span class="cbar__label"><b>' + esc(c[0]) + '</b>' + esc(c[1]) + '</span>' +
-                '<span class="cbar__track"><span class="cbar__fill" style="--v:' + c[2] + '%;--i:' + i + '"></span></span>' +
-                '<span class="cbar__val">' + c[2] + '%</span>' +
-              '</button>').join('') + '</div>' +
-            '<p class="cbars__axis"><span>0%</span><span>50%</span><span>100%</span></p>' +
-            '<p class="rx-detail" aria-live="polite"><b>' + esc(s[0] + ' · ' + s[1]) + '</b>' + esc(s[3]) + '</p>') +
-        '<div class="rx-chart__foot">' + tableBtn + '</div>' +
-      '</figure>';
-    } else if (rxTab === 'barriers') {
-      html = '<figure class="rx-chart">' +
-        '<figcaption><b>What made sketches hard to read</b><small>Share of responses that cited each barrier</small></figcaption>' +
-        (rxTable
-          ? '<table class="rx-table"><thead><tr><th>Barrier</th><th>Experienced</th><th>Novice</th></tr></thead><tbody>' +
-              R.barriers.map((b) => '<tr><td>' + esc(b[0]) + '</td><td>' + pctf(b[2]) + '</td><td>' + pctf(b[1]) + '</td></tr>').join('') + '</tbody></table>'
-          : '<p class="rx-legend"><span><i class="sw sw--1"></i>Experienced · 30 responses</span><span><i class="sw sw--2"></i>Novice · 18 responses</span></p>' +
-            '<div class="gbars">' + R.barriers.map((b, i) =>
-              '<div class="gbar"><p>' + esc(b[0]) + '</p>' +
-                '<div class="gbar__row" data-tip="' + esc('Experienced: ' + pctf(b[2])) + '"><span class="gbar__track"><span class="gbar__fill gbar__fill--1" style="--v:' + b[2] + '%;--i:' + i + '"></span></span><span class="gbar__val">' + pctf(b[2]) + '</span></div>' +
-                '<div class="gbar__row" data-tip="' + esc('Novice: ' + pctf(b[1])) + '"><span class="gbar__track"><span class="gbar__fill gbar__fill--2" style="--v:' + b[1] + '%;--i:' + i + '"></span></span><span class="gbar__val">' + pctf(b[1]) + '</span></div>' +
-              '</div>').join('') + '</div>' +
-            '<p class="rx-take">' + icon('info') + '<span>Missing measurements topped both groups. Experienced investigators also flagged unclear trajectories, a stricter standard for evidence.</span></p>') +
-        '<div class="rx-chart__foot">' + tableBtn + '</div>' +
-      '</figure>';
-    } else if (rxTab === 'questions') {
-      html = '<ol class="rx-qs">' + R.questions.map((q, i) => '<li><span class="flow__n">' + (i + 1) + '</span><span>' + esc(q) + '</span></li>').join('') + '</ol>';
-    } else if (rxTab === 'method') {
-      html = '<div class="rx-method">' + R.method.map((m) =>
-        '<div class="rx-card"><span class="tile__icon" data-tint="blue">' + icon(m[0]) + '</span><b>' + esc(m[1]) + '</b><span>' + esc(m[2]) + '</span></div>').join('') + '</div>';
-    } else {
-      html =
-        '<p class="rx-kicker">Two causes explain <b>' + esc(R.vitalFew) + '</b> of interpretation problems. The proposed system targets both.</p>' +
-        '<div class="rx-fixes">' + R.fixes.map((f) =>
-          '<div class="rx-card rx-fix"><span class="tile__icon" data-tint="orange">' + icon(f[0]) + '</span><p class="rx-fix__num">' + pctf(f[1]) + '</p><b>' + esc(f[2]) + '</b><span>' + esc(f[3]) + '</span></div>').join('') + '</div>' +
-        '<div class="rx-card rx-solution"><b>' + esc(R.solution.name) + '</b><ul class="xp__points">' + R.solution.points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul></div>' +
-        '<blockquote class="rx-quote">' + esc(R.conclusion) + '</blockquote>';
-    }
-    el.innerHTML = html;
-  }
-
-  /** Small hover/focus tooltip for chart marks ([data-tip]). */
-  function chartTip(target) {
-    const el = $('#tip');
-    el.innerHTML = '<b>' + esc(target.dataset.tip) + '</b>';
-    el.hidden = false;
-    const r = target.getBoundingClientRect(), tr = el.getBoundingClientRect();
-    let y = r.top - tr.height - 8;
-    if (y < 64) y = r.bottom + 8;
-    el.style.left = HOS.clamp(r.left + r.width / 2 - tr.width / 2, 8, innerWidth - tr.width - 8) + 'px';
-    el.style.top = y + 'px';
+      '</article>' +
+      '<p class="rx-privacy">' + icon('lock') + '<span>' + esc(R.privacy) + '</span></p>';
   }
 
   /* ======================================================================
@@ -915,6 +845,99 @@
   }
 
   /* ======================================================================
+     NAV PEEK: hover a top-menu item for a short preview with quick links
+     ====================================================================== */
+  function peekContent(id) {
+    const row = (attrs, ic, label, sub) => '<button class="peek__item" type="button" ' + attrs + '>' + icon(ic) +
+      '<span><b>' + esc(label) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span></button>';
+    const S = D.school, R = D.research;
+    const map = {
+      overview: ['Who I am, what I\'m doing now, and three reasons to hire me.', [
+        row('data-goto="overview"', 'user', 'About me', P.role + ' · ' + P.location),
+        row('data-goto="why"', 'shield', 'Why hire me', D.why.map((w) => w.title).join(' · ')),
+        row('data-action="resume"', 'file', 'Résumé', 'Preview, print or download')]],
+      projects: [D.projects.length + ' builds across software and embedded systems.', D.projects.slice(0, 4).map((p) =>
+        row('data-project="' + p.id + '"', CAT[p.cat].icon, p.title, catLine(p))).concat(row('data-goto="projects"', 'folder', 'See all ' + D.projects.length + ' projects', ''))],
+      skills: [D.skills.length + ' skills across ' + D.skillCategories.length + ' areas, from firmware to soft skills.', [
+        row('data-peek-view="orbit"', 'sparkles', 'Skill orbit', 'Drag it, spin it, tap a logo'),
+        row('data-peek-view="grid"', 'grid', 'Skill grid', 'Search and filter by category'),
+        row('data-peek-view="match"', 'checkCircle', 'Stack check', 'Does Hannah fit your stack?'),
+        row('data-peek-cat="soft"', 'message', 'Soft skills', 'Client communication, teamwork and more')]],
+      research: [R.status + ' undergraduate thesis · ' + R.year + '.', [
+        row('data-goto="research"', 'file', R.short, 'Read the abstract'),
+        row('data-goto="research"', 'lock', 'Public-safe summary', 'No case records or identities')]],
+      education: [S.degree + ', ' + S.short + '.', [
+        row('data-goto="education"', 'cap', S.name, S.years + ' · ' + S.city),
+        row('data-goto="journey-title"', 'map', 'My journey', S.journey.length + ' milestones')]],
+      experience: ['Working scholar since 2022, alongside full-time studies.', D.experience.map((j, i) =>
+        row('data-peek-xp="' + i + '"', XP_ICON[i % 3], j.role, j.org + (j.period ? ' · ' + j.period : '')))],
+      contact: ['Email is the fastest way to reach me.', [
+        row('data-copy="' + esc(P.email) + '"', 'copy', 'Copy email', P.email),
+        row('data-goto="contact"', 'send', 'Send a message', 'Opens your email app'),
+        L.linkedin ? '<a class="peek__item" href="' + esc(L.linkedin) + '" target="_blank" rel="noopener">' + icon('linkedin') + '<span><b>LinkedIn</b><small>Opens in a new tab</small></span></a>' : '']]
+    };
+    return map[id];
+  }
+
+  function initPeek() {
+    const panel = document.createElement('div');
+    panel.className = 'peek';
+    panel.id = 'peek';
+    panel.hidden = true;
+    document.body.appendChild(panel);
+    const hover = document.createElement('span');
+    hover.className = 'nav__hover';
+    hover.setAttribute('aria-hidden', 'true');
+    $('.nav__links').appendChild(hover);
+    let timer = 0, current = null;
+
+    const place = (link) => {
+      const r = link.getBoundingClientRect(), w = panel.offsetWidth;
+      const left = HOS.clamp(r.left + r.width / 2 - w / 2, 12, innerWidth - w - 12);
+      panel.style.left = left + 'px';
+      panel.style.top = (r.bottom + 10) + 'px';
+      panel.style.setProperty('--caret', (r.left + r.width / 2 - left) + 'px');
+      const nr = $('.nav__links').getBoundingClientRect();
+      hover.style.width = r.width + 'px';
+      hover.style.transform = 'translateX(' + (r.left - nr.left) + 'px)';
+      hover.classList.add('is-on');
+    };
+    const open = (link) => {
+      const id = link.getAttribute('href').slice(1), c = peekContent(id);
+      if (!c) return;
+      clearTimeout(timer);
+      if (current !== link) {
+        panel.innerHTML = '<p class="peek__lead">' + esc(c[0]) + '</p><div class="peek__list">' + c[1].join('') + '</div>' +
+          '<a class="peek__open" href="#' + id + '">Open ' + esc(link.textContent) + icon('next') + '</a>';
+        current = link;
+      }
+      panel.hidden = false;
+      place(link);
+      requestAnimationFrame(() => panel.classList.add('is-open'));
+    };
+    const close = (now) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        panel.classList.remove('is-open'); hover.classList.remove('is-on'); current = null;
+        setTimeout(() => { if (!panel.classList.contains('is-open')) panel.hidden = true; }, 180);
+      }, now ? 0 : 160);
+    };
+
+    $$('.nav__links a').forEach((a) => {
+      a.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { clearTimeout(timer); timer = setTimeout(() => open(a), current ? 0 : 90); } });
+      a.addEventListener('pointerleave', () => close());
+      a.addEventListener('focus', () => open(a));
+      a.addEventListener('blur', (e) => { if (!panel.contains(e.relatedTarget)) close(); });
+    });
+    panel.addEventListener('pointerenter', () => clearTimeout(timer));
+    panel.addEventListener('pointerleave', () => close());
+    panel.addEventListener('focusout', (e) => { if (!panel.contains(e.relatedTarget) && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.nav__links'))) close(); });
+    panel.addEventListener('click', (e) => { if (e.target.closest('button, a')) close(true); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { const c = current; close(true); if (c) c.focus(); } });
+    window.addEventListener('resize', () => close(true));
+  }
+
+  /* ======================================================================
      PAGER: one screen per section. Nav links, dots, arrows, mouse wheel
      at the end of a screen, PageUp/PageDown and swipes all change screens.
      ====================================================================== */
@@ -1036,7 +1059,7 @@
       deck.addEventListener('touchstart', (e) => {
         const p = e.touches[0];
         sx = p.clientX; sy = p.clientY; st = performance.now();
-        skip = !!e.target.closest('.proj-grid, .shots, .orbit, .marquee, .seg, .term-window, input, textarea, .sk-bento, .cbars, .journey__track');
+        skip = !!e.target.closest('.proj-grid, .shots, .orbit, .marquee, .seg, .term-window, input, textarea, .sk-bento, .journey__track');
       }, { passive: true });
       deck.addEventListener('touchend', (e) => {
         if (skip || Sheet.isOpen()) return;
@@ -1110,11 +1133,12 @@
       if (wf) { flipWhy(wf.closest('.why__card')); return; }
       const es = t.closest('[data-edu-step]');
       if (es) { setEduStep(+es.dataset.eduStep); return; }
-      const rt = t.closest('[data-rx-tab]');
-      if (rt) { rxTab = rt.dataset.rxTab; rxTable = false; renderRxPanel(); rt.focus(); return; }
-      const rs = t.closest('[data-rx-scn]');
-      if (rs) { rxScn = +rs.dataset.rxScn; renderRxPanel(); $('[data-rx-scn="' + rxScn + '"]').focus(); return; }
-      if (t.closest('[data-rx-table]')) { rxTable = !rxTable; renderRxPanel(); $('[data-rx-table]').focus(); return; }
+      const pv = t.closest('[data-peek-view]');
+      if (pv) { setSkillView(pv.dataset.peekView); goto('skills'); return; }
+      const pcat = t.closest('[data-peek-cat]');
+      if (pcat) { skillCat = pcat.dataset.peekCat; if (skillView === 'match') skillView = 'orbit'; renderSkills(); goto('skills'); return; }
+      const px = t.closest('[data-peek-xp]');
+      if (px) { xpSel = +px.dataset.peekXp; renderXp(); goto('experience'); return; }
       const sk = t.closest('.sk-card [data-skill], .orbit [data-skill]');
       if (sk && sk.closest('.orbit') && e.detail) return;   // pointer taps on the orbit are handled by initOrbit
       if (sk) { HOS.hideTip(); openSkill(sk.dataset.skill); return; }
@@ -1141,10 +1165,6 @@
     document.addEventListener('pointerout', (e) => { const s = e.target.closest('[data-skill]'); if (s && !s.contains(e.relatedTarget) && e.pointerType === 'mouse') HOS.hideTip(); });
     document.addEventListener('focusin', (e) => { const s = e.target.closest && e.target.closest('[data-skill]'); if (s && lastPointer !== 'touch') HOS.showTip(s); else if (!s) HOS.hideTip(); });
     document.addEventListener('scroll', HOS.hideTip, { passive: true, capture: true });
-
-    // Chart tooltips (research charts)
-    document.addEventListener('pointerover', (e) => { const c = e.target.closest('[data-tip]'); if (c && e.pointerType === 'mouse') chartTip(c); });
-    document.addEventListener('pointerout', (e) => { const c = e.target.closest('[data-tip]'); if (c && !c.contains(e.relatedTarget)) HOS.hideTip(); });
 
     // Radar keys highlight their axis
     const axis = (id, on) => $$('[data-axis="' + id + '"]').forEach((n) => n.classList.toggle('is-hot', on));
@@ -1182,7 +1202,7 @@
 
   /* Fade sections in as they scroll into view; count up the stats once */
   function reveal() {
-    const els = $$('.sec-head, .ov-intro, .why__card, .sk-me, .rx-paper, .rx-stat, .campus, .journey, .edu-tile, .xp-list, .term-window, .ccard, .mailform');
+    const els = $$('.sec-head, .ov-intro, .why__card, .sk-me, .rx-abstract, .campus, .journey, .edu-tile, .xp-list, .term-window, .ccard, .mailform');
     if (HOS.reduced() || !('IntersectionObserver' in window)) return;
     els.forEach((el) => el.classList.add('reveal'));
     const io = new IntersectionObserver((entries) => {
@@ -1229,6 +1249,7 @@
     initMarquee();
     spotlight();
     Pager.init();
+    initPeek();
     reveal();
     lazyTerminal();
     // Old "HR Mode" links (…/#hr) open the 1-page résumé

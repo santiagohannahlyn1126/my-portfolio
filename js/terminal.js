@@ -229,8 +229,8 @@
           const R = D.research;
           await this.printLines([
             '<span class="t-ok">[' + esc(R.status.toUpperCase()) + ']</span> <span class="t-b">' + esc(R.title) + '</span>',
-            '        <span class="t-mut">' + esc(R.kind) + ' · ' + esc(R.year) + '</span>'
-          ].concat(R.headline.map((h) => '        › <span class="t-acc">' + esc(h[0]) + '</span> ' + esc(h[1])))
+            '        <span class="t-mut">' + esc(R.kind) + ' · ' + esc(R.year) + '</span>', ''
+          ].concat(R.abstract.map((x) => '  ' + esc(x))).concat(['', '  <span class="t-mut">Keywords:</span> ' + R.keywords.map(esc).join(' · ')])
             .concat(['', '<span class="t-mut">Tip: open research  → interactive findings</span>']), 18);
           break;
         }
