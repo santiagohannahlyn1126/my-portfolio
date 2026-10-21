@@ -1997,6 +1997,37 @@ html.paged .play .term-window__body { height: auto; min-height: 0; }
   .term__send { display: none; }
 }
 
+.edge-hint {
+  position: fixed; left: 50%; bottom: 76px; z-index: 120; padding: 8px 16px; border-radius: 999px; pointer-events: none;
+  background: var(--text); color: var(--bg); font-size: 13.5px; font-weight: 600; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+  opacity: 0; transform: translate(-50%, 8px); transition: opacity 0.2s, transform 0.25s var(--spring);
+}
+.edge-hint.is-up { bottom: auto; top: calc(var(--nav-h) + 14px); transform: translate(-50%, -8px); }
+.edge-hint.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+/* 11l. Skills profile card: wider and readable */
+.sk-layout { grid-template-columns: minmax(330px, 400px) minmax(0, 1fr); }
+.sk-layout .sk-me { padding: 22px; }
+.sk-layout .flip { width: 72px; height: 72px; }
+.sk-layout .sk-me__id h3 { font-size: 19px; }
+.sk-layout .sk-me__id p { font-size: 14px; }
+.sk-layout .sk-me__h { font-size: 17px; }
+.sk-layout .sk-me__h small { font-size: 13.5px; }
+.sk-layout .radar { max-width: 360px; width: 100%; }
+.radar__label { font-size: 15px; font-weight: 600; fill: var(--text); }
+.sk-layout .radar__keys { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.sk-layout .radar__key { min-height: 34px; padding: 0 11px; font-size: 13.5px; }
+.sk-layout .radar__key b { color: var(--accent-text); }
+@media (max-width: 1100px) and (min-width: 1024px) { .sk-layout { grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); } }
+@media (min-width: 1024px) and (max-height: 800px) {
+  .sk-layout .sk-me { padding: 16px 18px; }
+  .sk-layout .flip { width: 60px; height: 60px; }
+  .sk-layout .sk-me__h { margin-top: 8px; }
+  .sk-layout .radar { max-width: 290px; margin-top: -6px; margin-bottom: -10px; }
+  .sk-layout .radar__keys { gap: 4px; }
+  .sk-layout .radar__key { min-height: 28px; font-size: 12.5px; }
+}
+
 /* 12. MOTION -------------------------------------------------------------- */
 .reveal { transform: translateY(32px); transition: transform 0.9s var(--ease); }
 .reveal.is-in { transform: none; }

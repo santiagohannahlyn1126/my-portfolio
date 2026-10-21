@@ -477,7 +477,7 @@
      SKILLS: profile card + radar, stack matcher, orbit / grid views
      ====================================================================== */
   let skillCat = 'all';
-  let skillView = HOS.store.get('hos-skill-view', 'orbit') === 'grid' ? 'grid' : 'orbit';   // 'orbit' | 'grid' | 'match'
+  let skillView = 'orbit';   // 'orbit' | 'grid' | 'match'; the Skills screen always opens on the orbit
   const stack = [];
   const CAT_TINT = { lang: 'blue', web: 'purple', db: 'green', hw: 'orange', plat: 'pink', tools: 'blue', qa: 'green', soft: 'purple' };
   const CAT_WIDE = { lang: 1, tools: 1 };          // big categories span the full row
@@ -500,7 +500,7 @@
   }
 
   function radarSVG(data) {
-    const max = D.projects.length, N = data.length, cx = 180, cy = 142, R = 92;
+    const max = D.projects.length, N = data.length, cx = 180, cy = 138, R = 86;
     const pt = (i, r) => { const a = -Math.PI / 2 + i * 2 * Math.PI / N; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; };
     const xy = (p) => p[0].toFixed(1) + ',' + p[1].toFixed(1);
     const poly = (r) => data.map((_, i) => xy(pt(i, r))).join(' ');
@@ -508,7 +508,7 @@
       [1 / 3, 2 / 3, 1].map((f) => '<polygon class="radar__ring" points="' + poly(R * f) + '"/>').join('') +
       data.map((_, i) => { const p = pt(i, R); return '<line class="radar__spoke" x1="' + cx + '" y1="' + cy + '" x2="' + p[0].toFixed(1) + '" y2="' + p[1].toFixed(1) + '"/>'; }).join('') +
       '<polygon class="radar__shape" points="' + data.map((d, i) => xy(pt(i, R * d.n / max))).join(' ') + '"/>' +
-      data.map((d, i) => { const p = pt(i, R * d.n / max); return '<circle class="radar__dot" data-axis="' + d.c.id + '" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4.5"/>'; }).join('') +
+      data.map((d, i) => { const p = pt(i, R * d.n / max); return '<circle class="radar__dot" data-axis="' + d.c.id + '" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="5.5"/>'; }).join('') +
       data.map((d, i) => {
         const p = pt(i, R + 16), anchor = Math.abs(p[0] - cx) < 4 ? 'middle' : p[0] > cx ? 'start' : 'end';
         return '<text class="radar__label" data-axis="' + d.c.id + '" x="' + p[0].toFixed(1) + '" y="' + p[1].toFixed(1) + '" text-anchor="' + anchor + '" dominant-baseline="middle">' + CAT_SHORT[d.c.id] + '</text>';
@@ -733,7 +733,7 @@
         '</header>' +
         '<div class="skill-grid">' + list.map(tile).join('') + '</div>' +
       '</section>';
-    }).join('') + '<div class="sk-pick" hidden>' + icon('grid') + '<b>Pick a skill category</b><span>Choose one to see those skills.</span>' +
+    }).join('') + '<div class="sk-pick" hidden>' + icon('grid') + '<b>Select Specific Skills First</b><span>Choose a category below or above to see those skills.</span>' +
       '<div class="sk-pick__cats">' + D.skillCategories.map((c) =>
         '<button class="sk-pick__cat" type="button" data-skill-cat="' + c.id + '"><span class="tile__icon" data-tint="' + CAT_TINT[c.id] + '">' + icon(c.icon) + '</span>' + esc(c.name) +
         '<small>' + D.skills.filter((s) => s.cat === c.id).length + '</small></button>').join('') + '</div></div>' +
@@ -745,7 +745,6 @@
 
   function setSkillView(v) {
     skillView = v;
-    if (v !== 'match') HOS.store.set('hos-skill-view', v);
     $('#skill-orbit').hidden = v !== 'orbit';
     $('#skill-groups').hidden = v !== 'grid';
     $('#sk-match').hidden = v !== 'match';
@@ -774,7 +773,7 @@
       });
       $('.sk-pick').hidden = !pick;
       $('.sk-empty').hidden = pick || shown > 0;
-      if (pick) { $('#skill-count').textContent = 'Pick a category above to see its skills'; return; }
+      if (pick) { $('#skill-count').textContent = 'Select specific skills first'; return; }
     }
     const filtered = q || onlyUsed || skillCat !== 'all';
     $('#skill-count').textContent = filtered ? 'Showing ' + shown + ' of ' + D.skills.length + ' skills' : D.skills.length + ' skills across ' + D.skillCategories.length + ' categories';
@@ -1203,10 +1202,25 @@
         const out = from.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(' + (-dir * 48) + 'px)' }], { duration: 240, easing: 'ease-in' });
         out.onfinish = () => { if (!from.classList.contains('is-active')) from.hidden = true; };
       } else from.hidden = true;
+      this.armed = 0; this.edgeHint(0);
       this.sync();
       history.replaceState(null, '', id === 'top' ? location.pathname + location.search : '#' + id);
       if (!(opts && opts.keepFocus)) to.focus({ preventScroll: true });
       this.onShow(id);
+    },
+
+    /** "Scroll again for <next screen>" pill at the top / bottom edge. */
+    edgeHint(dir) {
+      let el = $('#edge-hint');
+      if (!el) { el = document.createElement('div'); el.id = 'edge-hint'; el.className = 'edge-hint'; el.setAttribute('aria-hidden', 'true'); document.body.appendChild(el); }
+      clearTimeout(this.hintT);
+      if (!dir) { el.classList.remove('is-on'); return; }
+      const t = this.pages[this.i + dir];
+      if (!t) return;
+      el.textContent = 'Scroll again for ' + t.dataset.title + (dir > 0 ? ' ↓' : ' ↑');
+      el.classList.toggle('is-up', dir < 0);
+      el.classList.add('is-on');
+      this.hintT = setTimeout(() => { el.classList.remove('is-on'); this.armed = 0; }, 2500);
     },
 
     step(d) {
@@ -1217,6 +1231,7 @@
     onShow(id) {
       if (id === 'top' && !this.counted) { this.counted = true; HOS.countUp($('#home-stats')); }
       if (id === 'projects') { Car.measure(); Car.play(); }
+      if (id === 'skills' && (skillView !== 'orbit' || skillCat !== 'all')) { skillView = 'orbit'; skillCat = 'all'; renderSkills(); }
     },
 
     /** Can this element (or a scroller between it and the screen) still scroll in direction dir? */
@@ -1243,7 +1258,11 @@
         if (fresh) { gestureAtEdge = atEdge; acc = 0; }
         if (!atEdge || !gestureAtEdge || now - this.lock < 650) return;
         acc += Math.abs(e.deltaY);
-        if (acc > 60) { acc = 0; gestureAtEdge = false; this.step(dir); }
+        if (acc < 60) return;
+        acc = 0; gestureAtEdge = false;
+        // First scroll at the edge only shows a hint; a second deliberate scroll changes screen
+        if (this.armed === dir && now - this.armedAt < 2500) { this.armed = 0; this.edgeHint(0); this.step(dir); }
+        else { this.armed = dir; this.armedAt = now; this.edgeHint(dir); }
       }, { passive: true });
 
       // Keys: PageUp / PageDown at a screen's edge, ← / → when nothing interactive has focus
