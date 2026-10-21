@@ -137,6 +137,7 @@ window.HOS_DATA = {
     year: '2026',
     status: 'Approved',
     team: '3-member research team',
+    lead: 'How police investigators read hand-drawn crash sketches, and a digital tool to close the gaps.',
     pitch: 'When police investigators read the same hand-drawn crash sketch, do they reach the same conclusion? We measured it and found where manual diagrams break down. Then we specified a digital tool to fix it.',
     headline: [
       ['67.6%', 'of interpretation problems trace to two causes: blurry sketches and missing measurements'],

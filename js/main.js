@@ -21,10 +21,17 @@
     return '<button class="' + cls + '" type="button" data-soon="' + label + ' profile">' + inner + '</button>';
   }
 
-  /** Smooth-scroll to a section (respects reduced motion). */
+  /** Go to a screen, or to an element inside one (scrolls normally when the pager is off). */
   function goto(id) {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: HOS.reduced() ? 'auto' : 'smooth', block: 'start' });
+    if (!el) return;
+    const page = el.closest('.page');
+    if (Pager.on && page) {
+      Pager.show(page.id);
+      if (el !== page) requestAnimationFrame(() => el.scrollIntoView({ block: 'start' }));
+      return;
+    }
+    el.scrollIntoView({ behavior: HOS.reduced() ? 'auto' : 'smooth', block: 'start' });
   }
 
   /* ======================================================================
@@ -35,7 +42,7 @@
     const sw = D.projects.filter((p) => p.cat === 'software').length, emb = D.projects.length - sw;
     const logos = D.skills.filter((s) => s.logo);
     const stack = logos.slice(0, 5);
-    $('#bento').innerHTML =
+    $('#ov-intro').innerHTML =
       '<article class="ov-intro">' +
         '<div class="ov-intro__top">' +
           '<span class="ov-intro__ph"><img src="' + esc(P.photo) + '" alt="" width="64" height="64"><i></i></span>' +
@@ -47,7 +54,8 @@
           '<button class="btn btn--primary btn--sm" type="button" data-goto="projects">' + icon('folder') + 'See my work</button>' +
           '<button class="btn btn--tinted btn--sm" type="button" data-action="resume">' + icon('file') + 'Résumé</button>' +
         '</div>' +
-      '</article>' +
+      '</article>';
+    $('#home-stats').innerHTML =
       '<button class="ov-stat" type="button" data-goto="experience" data-tint="blue">' +
         '<span class="ov-stat__head"><b class="ov-stat__num"><span data-count="' + yrs.value + '">' + yrs.value + '</span><small>yrs</small></b>' + icon('briefcase') + '</span>' +
         '<span class="ov-stat__label">as a working scholar</span>' +
@@ -200,6 +208,7 @@
       '<div class="seg" role="tablist" aria-label="Filter projects">' + FILTERS.map((x) =>
         '<button class="seg__btn" role="tab" type="button" data-filter="' + x.id + '" aria-selected="' + (pstate.cat === x.id) + '">' + x.label + '</button>').join('') + '</div>' + chip;
 
+    $('#proj-grid').scrollLeft = 0;
     $('#proj-grid').innerHTML = list.length ? list.map((p, i) =>
       '<button class="pcard" type="button" data-project="' + p.id + '" style="--i:' + i + '">' +
         '<span class="pcard__img' + (p.cover ? ' pcard__img--shot' : '') + '"><img src="' + esc(p.cover || thumb(p)) + '" alt="" width="800" height="500" loading="lazy" decoding="async"' + (p.cover && p.id !== 'xeleqt' ? ' style="object-position:center"' : '') + '></span>' +
@@ -278,7 +287,7 @@
      SKILLS: profile card + radar, stack matcher, orbit / grid views
      ====================================================================== */
   let skillCat = 'all';
-  let skillView = HOS.store.get('hos-skill-view', 'orbit') === 'grid' ? 'grid' : 'orbit';
+  let skillView = HOS.store.get('hos-skill-view', 'orbit') === 'grid' ? 'grid' : 'orbit';   // 'orbit' | 'grid' | 'match'
   const stack = [];
   const CAT_TINT = { lang: 'blue', web: 'purple', db: 'green', hw: 'orange', plat: 'pink', tools: 'blue', qa: 'green', soft: 'purple' };
   const CAT_WIDE = { lang: 1, tools: 1 };          // big categories span the full row
@@ -538,9 +547,11 @@
 
   function setSkillView(v) {
     skillView = v;
-    HOS.store.set('hos-skill-view', v);
+    if (v !== 'match') HOS.store.set('hos-skill-view', v);
     $('#skill-orbit').hidden = v !== 'orbit';
     $('#skill-groups').hidden = v !== 'grid';
+    $('#sk-match').hidden = v !== 'match';
+    $('#sk-main').dataset.view = v;
     $$('[data-skill-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.skillView === v)));
     filterSkills();
   }
@@ -601,31 +612,34 @@
   /* ======================================================================
      RESEARCH: public-safe summary of the approved thesis
      ====================================================================== */
-  const RX_TABS = [['findings', 'Findings'], ['questions', 'Questions'], ['method', 'Method'], ['solution', 'Solution']];
-  let rxTab = 'findings', rxScn = 1, rxTable = false;
+  const RX_TABS = [['agree', 'Agreement'], ['barriers', 'Barriers'], ['questions', 'Questions'], ['method', 'Method'], ['solution', 'Solution']];
+  let rxTab = 'agree', rxScn = 1, rxTable = false;
   const pctf = (v) => (Math.round(v * 10) / 10) + '%';
 
   function renderResearch() {
     const R = D.research;
     $('#research-body').innerHTML =
-      '<header class="sec-head">' +
-        '<p class="eyebrow">Research</p>' +
-        '<h2 class="sec-title" id="research-title">' + esc(R.short.replace(/, (.*)$/, ',')) + '<br><span class="muted">' + esc(R.short.replace(/^.*?, /, '')) + '.</span></h2>' +
-        '<p class="sec-lead">' + esc(R.pitch) + '</p>' +
+      '<header class="sec-head sec-head--row">' +
+        '<div><p class="eyebrow">Research</p>' +
+        '<h2 class="sec-title" id="research-title">' + esc(R.short.replace(/, (.*)$/, ',')) + ' <span class="muted">' + esc(R.short.replace(/^.*?, /, '')) + '.</span></h2></div>' +
+        '<p class="sec-lead">' + esc(R.lead) + '</p>' +
       '</header>' +
-      '<article class="rx-paper">' +
-        '<span class="tile__icon" data-tint="green">' + icon('file') + '</span>' +
-        '<div class="rx-paper__main">' +
-          '<p class="rx-paper__meta"><span class="badge-now">' + icon('checkCircle') + esc(R.status) + ' · ' + esc(R.year) + '</span>' + esc(R.kind) + '</p>' +
-          '<h3 class="rx-paper__title">' + esc(R.title) + '</h3>' +
-          '<p class="rx-paper__sub">' + esc(R.team) + ' · Grounded in ' + R.theories.map(esc).join(', ') + '</p>' +
+      '<div class="rx-layout">' +
+        '<aside class="rx-aside">' +
+          '<article class="rx-paper">' +
+            '<p class="rx-paper__meta"><span class="badge-now">' + icon('checkCircle') + esc(R.status) + ' · ' + esc(R.year) + '</span>' + esc(R.kind) + '</p>' +
+            '<h3 class="rx-paper__title">' + esc(R.title) + '</h3>' +
+            '<p class="rx-paper__sub">' + esc(R.team) + '</p>' +
+          '</article>' +
+          '<div class="rx-stats">' + R.headline.map((h) => '<div class="rx-stat"><b>' + esc(h[0]) + '</b><span>' + esc(h[1]) + '</span></div>').join('') + '</div>' +
+          '<p class="rx-privacy">' + icon('lock') + '<span>' + esc(R.privacy) + '</span></p>' +
+        '</aside>' +
+        '<div class="rx-main">' +
+          '<div class="seg rx-tabs" role="tablist" aria-label="Research sections">' + RX_TABS.map((t) =>
+            '<button class="seg__btn" role="tab" type="button" id="rxt-' + t[0] + '" data-rx-tab="' + t[0] + '" aria-controls="rx-panel" aria-selected="' + (rxTab === t[0]) + '">' + t[1] + '</button>').join('') + '</div>' +
+          '<div class="rx-panel" id="rx-panel" role="tabpanel" aria-labelledby="rxt-' + rxTab + '"></div>' +
         '</div>' +
-      '</article>' +
-      '<div class="rx-stats">' + R.headline.map((h) => '<div class="rx-stat"><b>' + esc(h[0]) + '</b><span>' + esc(h[1]) + '</span></div>').join('') + '</div>' +
-      '<div class="seg-wrap"><div class="seg" role="tablist" aria-label="Research sections">' + RX_TABS.map((t) =>
-        '<button class="seg__btn" role="tab" type="button" id="rxt-' + t[0] + '" data-rx-tab="' + t[0] + '" aria-controls="rx-panel" aria-selected="' + (rxTab === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div>' +
-      '<div class="rx-panel" id="rx-panel" role="tabpanel" aria-labelledby="rxt-' + rxTab + '"></div>' +
-      '<p class="rx-privacy">' + icon('lock') + '<span>' + esc(R.privacy) + '</span></p>';
+      '</div>';
     renderRxPanel();
   }
 
@@ -633,49 +647,48 @@
     const R = D.research, el = $('#rx-panel');
     el.setAttribute('aria-labelledby', 'rxt-' + rxTab);
     $$('[data-rx-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.rxTab === rxTab)));
+    const tableBtn = '<button class="btn btn--tinted btn--sm" type="button" data-rx-table aria-expanded="' + rxTable + '">' + icon('grid') + (rxTable ? 'Show chart' : 'Show as table') + '</button>';
     let html = '';
-    if (rxTab === 'findings') {
+    if (rxTab === 'agree') {
       const s = R.consensus[rxScn];
-      html =
-        '<div class="rx-grid">' +
-          '<figure class="rx-chart">' +
-            '<figcaption><b>How often investigators agreed</b><small>Share who reached the same reading of each sketch · 8 investigators · dashed line = majority</small></figcaption>' +
-            '<div class="cbars">' + R.consensus.map((c, i) =>
+      html = '<figure class="rx-chart">' +
+        '<figcaption><b>How often investigators agreed</b><small>Share who reached the same reading of each sketch · 8 investigators · dashed line = majority</small></figcaption>' +
+        (rxTable
+          ? '<table class="rx-table"><thead><tr><th>Scenario</th><th>Collision</th><th>Agreed</th></tr></thead><tbody>' +
+              R.consensus.map((c) => '<tr><td>' + esc(c[0]) + '</td><td>' + esc(c[1]) + '</td><td>' + c[2] + '%</td></tr>').join('') + '</tbody></table>'
+          : '<div class="cbars">' + R.consensus.map((c, i) =>
               '<button class="cbar" type="button" data-rx-scn="' + i + '" aria-pressed="' + (i === rxScn) + '" data-tip="' + esc(c[0] + ' · ' + c[1] + ': ' + c[2] + '% agreed') + '">' +
                 '<span class="cbar__label"><b>' + esc(c[0]) + '</b>' + esc(c[1]) + '</span>' +
                 '<span class="cbar__track"><span class="cbar__fill" style="--v:' + c[2] + '%;--i:' + i + '"></span></span>' +
                 '<span class="cbar__val">' + c[2] + '%</span>' +
               '</button>').join('') + '</div>' +
             '<p class="cbars__axis"><span>0%</span><span>50%</span><span>100%</span></p>' +
-            '<p class="rx-detail" aria-live="polite"><b>' + esc(s[0] + ' · ' + s[1]) + '</b>' + esc(s[3]) + '</p>' +
-          '</figure>' +
-          '<figure class="rx-chart">' +
-            '<figcaption><b>What made sketches hard to read</b><small>Share of responses that cited each barrier</small></figcaption>' +
-            '<p class="rx-legend"><span><i class="sw sw--1"></i>Experienced · 30 responses</span><span><i class="sw sw--2"></i>Novice · 18 responses</span></p>' +
+            '<p class="rx-detail" aria-live="polite"><b>' + esc(s[0] + ' · ' + s[1]) + '</b>' + esc(s[3]) + '</p>') +
+        '<div class="rx-chart__foot">' + tableBtn + '</div>' +
+      '</figure>';
+    } else if (rxTab === 'barriers') {
+      html = '<figure class="rx-chart">' +
+        '<figcaption><b>What made sketches hard to read</b><small>Share of responses that cited each barrier</small></figcaption>' +
+        (rxTable
+          ? '<table class="rx-table"><thead><tr><th>Barrier</th><th>Experienced</th><th>Novice</th></tr></thead><tbody>' +
+              R.barriers.map((b) => '<tr><td>' + esc(b[0]) + '</td><td>' + pctf(b[2]) + '</td><td>' + pctf(b[1]) + '</td></tr>').join('') + '</tbody></table>'
+          : '<p class="rx-legend"><span><i class="sw sw--1"></i>Experienced · 30 responses</span><span><i class="sw sw--2"></i>Novice · 18 responses</span></p>' +
             '<div class="gbars">' + R.barriers.map((b, i) =>
               '<div class="gbar"><p>' + esc(b[0]) + '</p>' +
                 '<div class="gbar__row" data-tip="' + esc('Experienced: ' + pctf(b[2])) + '"><span class="gbar__track"><span class="gbar__fill gbar__fill--1" style="--v:' + b[2] + '%;--i:' + i + '"></span></span><span class="gbar__val">' + pctf(b[2]) + '</span></div>' +
                 '<div class="gbar__row" data-tip="' + esc('Novice: ' + pctf(b[1])) + '"><span class="gbar__track"><span class="gbar__fill gbar__fill--2" style="--v:' + b[1] + '%;--i:' + i + '"></span></span><span class="gbar__val">' + pctf(b[1]) + '</span></div>' +
               '</div>').join('') + '</div>' +
-            '<p class="rx-take">' + icon('info') + '<span>Missing measurements topped both groups. Experienced investigators also flagged unclear trajectories, a stricter standard for evidence.</span></p>' +
-          '</figure>' +
-        '</div>' +
-        '<div class="rx-tablebar"><button class="btn btn--tinted btn--sm" type="button" data-rx-table aria-expanded="' + rxTable + '">' + icon('grid') + (rxTable ? 'Hide table' : 'Show as table') + '</button></div>' +
-        (rxTable ? '<div class="rx-tables">' +
-          '<table><caption>Investigator agreement by scenario</caption><thead><tr><th>Scenario</th><th>Collision</th><th>Agreed</th></tr></thead><tbody>' +
-            R.consensus.map((c) => '<tr><td>' + esc(c[0]) + '</td><td>' + esc(c[1]) + '</td><td>' + c[2] + '%</td></tr>').join('') + '</tbody></table>' +
-          '<table><caption>Barriers cited (% of responses)</caption><thead><tr><th>Barrier</th><th>Experienced</th><th>Novice</th></tr></thead><tbody>' +
-            R.barriers.map((b) => '<tr><td>' + esc(b[0]) + '</td><td>' + pctf(b[2]) + '</td><td>' + pctf(b[1]) + '</td></tr>').join('') + '</tbody></table>' +
-        '</div>' : '');
+            '<p class="rx-take">' + icon('info') + '<span>Missing measurements topped both groups. Experienced investigators also flagged unclear trajectories, a stricter standard for evidence.</span></p>') +
+        '<div class="rx-chart__foot">' + tableBtn + '</div>' +
+      '</figure>';
     } else if (rxTab === 'questions') {
       html = '<ol class="rx-qs">' + R.questions.map((q, i) => '<li><span class="flow__n">' + (i + 1) + '</span><span>' + esc(q) + '</span></li>').join('') + '</ol>';
     } else if (rxTab === 'method') {
       html = '<div class="rx-method">' + R.method.map((m) =>
-        '<div class="rx-card"><span class="tile__icon" data-tint="blue">' + icon(m[0]) + '</span><b>' + esc(m[1]) + '</b><span>' + esc(m[2]) + '</span></div>').join('') + '</div>' +
-        '<div class="tags rx-theories">' + R.theories.map((t) => '<span class="tag tag--plain">' + esc(t) + '</span>').join('') + '</div>';
+        '<div class="rx-card"><span class="tile__icon" data-tint="blue">' + icon(m[0]) + '</span><b>' + esc(m[1]) + '</b><span>' + esc(m[2]) + '</span></div>').join('') + '</div>';
     } else {
       html =
-        '<p class="rx-kicker">A Pareto analysis found that two causes explain <b>' + esc(R.vitalFew) + '</b> of interpretation problems. The proposed system targets both.</p>' +
+        '<p class="rx-kicker">Two causes explain <b>' + esc(R.vitalFew) + '</b> of interpretation problems. The proposed system targets both.</p>' +
         '<div class="rx-fixes">' + R.fixes.map((f) =>
           '<div class="rx-card rx-fix"><span class="tile__icon" data-tint="orange">' + icon(f[0]) + '</span><p class="rx-fix__num">' + pctf(f[1]) + '</p><b>' + esc(f[2]) + '</b><span>' + esc(f[3]) + '</span></div>').join('') + '</div>' +
         '<div class="rx-card rx-solution"><b>' + esc(R.solution.name) + '</b><ul class="xp__points">' + R.solution.points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul></div>' +
@@ -703,13 +716,12 @@
 
   function renderEducation() {
     const S = D.school;
-    const hs = D.education[1];
     $('#education-body').innerHTML =
-      '<header class="sec-head">' +
-        '<p class="eyebrow">Education</p>' +
-        '<h2 class="sec-title" id="education-title">Engineered at ' + esc(S.short) + '.<br><span class="muted">' + S.motto.map(esc).join(' et ') + '.</span></h2>' +
-        '<p class="sec-lead">' + esc(S.degree) + ', ' + esc(S.name) + '.</p>' +
+      '<header class="sec-head sec-head--row">' +
+        '<div><p class="eyebrow">Education</p>' +
+        '<h2 class="sec-title" id="education-title">Engineered at ' + esc(S.short) + '. <span class="muted">' + S.motto.map(esc).join(' et ') + '.</span></h2></div>' +
       '</header>' +
+      '<div class="edu-layout">' +
       '<article class="campus" data-tilt>' +
         '<img class="campus__bg" src="' + esc(S.photo) + '" alt="" width="790" height="720" loading="lazy" decoding="async">' +
         '<span class="campus__mark" aria-hidden="true">' + esc(S.short) + '</span>' +
@@ -733,16 +745,15 @@
           '<div class="journey__track" role="group" aria-label="Education timeline">' + S.journey.map((j, i) =>
             '<button class="jstep" type="button" data-edu-step="' + i + '" aria-pressed="' + (i === eduStep) + '" style="--i:' + i + '">' +
               '<span class="jstep__dot">' + icon(j[1]) + '</span><span class="jstep__year">' + esc(j[0]) + '</span><span class="jstep__name">' + esc(j[2]) + '</span>' +
+              '<span class="jstep__desc">' + esc(j[3]) + '</span>' +
             '</button>').join('') +
             '<span class="journey__fill" aria-hidden="true"></span>' +
           '</div>' +
-          '<div class="journey__card" aria-live="polite"></div>' +
         '</section>' +
         '<aside class="edu-side">' +
           '<div class="edu-tile"><h3>' + icon('chip') + 'What I trained in</h3><div class="edu-focus">' + S.focus.map((f) => '<span>' + esc(f) + '</span>').join('') + '</div></div>' +
-          '<div class="edu-tile edu-tile--honor"><span class="tile__icon" data-tint="orange">' + icon('award') + '</span><div><h3>' + esc(hs.title) + '</h3><p>' + esc(hs.org) + ' · ' + esc(hs.note) + '</p></div></div>' +
         '</aside>' +
-      '</div>';
+      '</div></div>';
     setEduStep(eduStep);
   }
 
@@ -751,7 +762,7 @@
     const j = D.school.journey[i], n = D.school.journey.length;
     $$('[data-edu-step]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.eduStep === i)));
     $('.journey').style.setProperty('--p', n > 1 ? i / (n - 1) : 1);
-    $('.journey__card').innerHTML = '<span class="tile__icon" data-tint="green">' + icon(j[1]) + '</span><div><small>' + esc(j[0]) + '</small><b>' + esc(j[2]) + '</b><p>' + esc(j[3]) + '</p></div>';
+    if ($('.journey__card')) $('.journey__card').innerHTML = '<span class="tile__icon" data-tint="green">' + icon(j[1]) + '</span><div><small>' + esc(j[0]) + '</small><b>' + esc(j[2]) + '</b><p>' + esc(j[3]) + '</p></div>';
   }
 
   /** Gentle 3D tilt + photo parallax on the campus card (mouse only, respects reduced motion). */
@@ -772,20 +783,41 @@
   }
 
   /* ======================================================================
-     EXPERIENCE
+     EXPERIENCE: role list (left) + selected role details (right)
      ====================================================================== */
+  const XP_TINT = ['blue', 'purple', 'green'], XP_ICON = ['briefcase', 'message', 'cap'];
+  let xpSel = 0;
+
   function renderExperience() {
-    const tints = ['blue', 'purple', 'green'], ics = ['briefcase', 'message', 'cap'];
-    $('#exp').innerHTML = D.experience.map((j, i) =>
-      '<article class="xp">' +
-        '<span class="tile__icon" data-tint="' + tints[i % 3] + '">' + icon(ics[i % 3]) + '</span>' +
-        '<div class="xp__main">' +
-          '<div class="xp__top"><h3>' + esc(j.role) + '</h3>' +
-            (j.status === 'ACTIVE' ? '<span class="badge-now">' + esc(j.badge || 'Current') + '</span>' : '') + '</div>' +
-          '<p class="xp__org">' + esc(j.org) + (j.period ? ' · <span class="xp__period">' + esc(j.period) + '</span>' : '') + '</p>' +
-          '<ul class="xp__points">' + j.points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>' +
-        '</div>' +
-      '</article>').join('');
+    $('#exp').innerHTML =
+      '<div class="xp-list" role="tablist" aria-label="Roles" aria-orientation="vertical">' + D.experience.map((j, i) =>
+        '<button class="xp-item" role="tab" type="button" id="xpt-' + i + '" data-xp="' + i + '" aria-controls="xp-detail" aria-selected="' + (i === xpSel) + '">' +
+          '<span class="tile__icon" data-tint="' + XP_TINT[i % 3] + '">' + icon(XP_ICON[i % 3]) + '</span>' +
+          '<span class="xp-item__txt"><b>' + esc(j.role) + '</b><small>' + esc(j.org) + '</small>' +
+            (j.period ? '<small class="xp-item__period">' + esc(j.period) + '</small>' : '') + '</span>' +
+          (j.status === 'ACTIVE' ? '<span class="badge-now">' + esc(j.badge || 'Current') + '</span>' : '') +
+          icon('next') +
+        '</button>').join('') +
+      '</div>' +
+      '<article class="xp" id="xp-detail" role="tabpanel"></article>';
+    renderXp();
+  }
+
+  function renderXp() {
+    const j = D.experience[xpSel], el = $('#xp-detail');
+    $$('[data-xp]').forEach((b) => b.setAttribute('aria-selected', String(+b.dataset.xp === xpSel)));
+    el.setAttribute('aria-labelledby', 'xpt-' + xpSel);
+    el.innerHTML =
+      '<span class="tile__icon" data-tint="' + XP_TINT[xpSel % 3] + '">' + icon(XP_ICON[xpSel % 3]) + '</span>' +
+      '<div class="xp__main">' +
+        '<div class="xp__top"><h3>' + esc(j.role) + '</h3>' +
+          (j.status === 'ACTIVE' ? '<span class="badge-now">' + esc(j.badge || 'Current') + '</span>' : '') + '</div>' +
+        '<p class="xp__org">' + esc(j.org) + (j.period ? ' · <span class="xp__period">' + esc(j.period) + '</span>' : '') + '</p>' +
+        '<ul class="xp__points">' + j.points.map((p, i) => '<li style="--i:' + i + '">' + esc(p) + '</li>').join('') + '</ul>' +
+      '</div>';
+    el.classList.remove('is-swap');
+    void el.offsetWidth;
+    el.classList.add('is-swap');
   }
 
   /* ======================================================================
@@ -883,6 +915,138 @@
   }
 
   /* ======================================================================
+     PAGER: one screen per section. Nav links, dots, arrows, mouse wheel
+     at the end of a screen, PageUp/PageDown and swipes all change screens.
+     ====================================================================== */
+  const Pager = {
+    on: false, pages: [], i: 0, lock: 0, counted: false,
+
+    init() {
+      this.pages = $$('.page');
+      if (!this.pages.length) return;
+      this.on = true;
+      document.documentElement.classList.add('paged');
+      const want = location.hash.slice(1);
+      const el = want && document.getElementById(want);
+      const pg = el && el.closest('.page');
+      const start = pg ? this.pages.indexOf(pg) : 0;
+      this.pages.forEach((p, k) => { p.tabIndex = -1; p.hidden = k !== start; p.classList.toggle('is-active', k === start); });
+      this.i = start;
+      const bar = $('#pager');
+      bar.hidden = false;
+      bar.innerHTML =
+        '<button class="pager__arrow" type="button" data-page-step="-1" aria-label="Previous screen">' + icon('back') + '</button>' +
+        '<div class="pager__dots">' + this.pages.map((p) =>
+          '<button class="pager__dot" type="button" data-page="' + p.id + '" aria-label="' + esc(p.dataset.title) + '"><span>' + esc(p.dataset.title) + '</span></button>').join('') + '</div>' +
+        '<span class="pager__label"></span>' +
+        '<button class="pager__arrow pager__arrow--next" type="button" data-page-step="1" aria-label="Next screen"><span class="pager__next"></span>' + icon('next') + '</button>';
+      this.sync();
+      this.bind();
+      if (el && el !== pg) requestAnimationFrame(() => el.scrollIntoView({ block: 'start' }));
+      this.onShow(this.pages[start].id);
+    },
+
+    sync() {
+      const cur = this.pages[this.i], n = this.pages.length, next = this.pages[this.i + 1];
+      $$('.pager__dot').forEach((d) => { if (d.dataset.page === cur.id) d.setAttribute('aria-current', 'step'); else d.removeAttribute('aria-current'); });
+      $('.pager__label').textContent = (this.i + 1) + ' / ' + n + ' · ' + cur.dataset.title;
+      $('.pager__next').textContent = next ? next.dataset.title : '';
+      $('[data-page-step="-1"]').disabled = this.i === 0;
+      $('[data-page-step="1"]').disabled = this.i === n - 1;
+      $$('[data-spy]').forEach((l) => { if (l.dataset.spy === cur.id) l.setAttribute('aria-current', 'true'); else l.removeAttribute('aria-current'); });
+      $('#nav').style.setProperty('--sp', n > 1 ? (this.i / (n - 1)).toFixed(4) : 1);
+    },
+
+    show(id, opts) {
+      const k = this.pages.findIndex((p) => p.id === id);
+      if (k < 0 || k === this.i) return;
+      const from = this.pages[this.i], to = this.pages[k], dir = k > this.i ? 1 : -1;
+      HOS.hideTip();
+      to.hidden = false;
+      to.scrollTop = 0;
+      from.classList.remove('is-active');
+      to.classList.add('is-active');
+      this.i = k;
+      this.lock = performance.now();
+      // Web Animations: a short slide that still plays when the OS asks for less motion (it's user-initiated)
+      if (to.animate) {
+        to.animate([{ opacity: 0, transform: 'translateX(' + (dir * 48) + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 440, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+        const out = from.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(' + (-dir * 48) + 'px)' }], { duration: 240, easing: 'ease-in' });
+        out.onfinish = () => { if (!from.classList.contains('is-active')) from.hidden = true; };
+      } else from.hidden = true;
+      this.sync();
+      history.replaceState(null, '', id === 'top' ? location.pathname + location.search : '#' + id);
+      if (!(opts && opts.keepFocus)) to.focus({ preventScroll: true });
+      this.onShow(id);
+    },
+
+    step(d) {
+      const k = this.i + d;
+      if (k >= 0 && k < this.pages.length) this.show(this.pages[k].id);
+    },
+
+    onShow(id) {
+      if (id === 'top' && !this.counted) { this.counted = true; HOS.countUp($('#home-stats')); }
+    },
+
+    /** Can this element (or a scroller between it and the screen) still scroll in direction dir? */
+    innerCanScroll(target, page, dir) {
+      for (let el = target; el && el !== page; el = el.parentElement) {
+        if (el.scrollHeight > el.clientHeight + 1 && /(auto|scroll)/.test(getComputedStyle(el).overflowY)) {
+          if (dir > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0) return true;
+        }
+      }
+      return false;
+    },
+
+    bind() {
+      const deck = $('#main');
+      // Wheel: scroll the screen first; a fresh wheel gesture at its top / bottom flips the screen
+      let acc = 0, lastWheel = 0, gestureAtEdge = false;
+      deck.addEventListener('wheel', (e) => {
+        if (Sheet.isOpen() || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+        const page = this.pages[this.i], dir = e.deltaY > 0 ? 1 : -1, now = performance.now();
+        const fresh = now - lastWheel > 220;
+        lastWheel = now;
+        if (this.innerCanScroll(e.target, page, dir)) { gestureAtEdge = false; return; }
+        const atEdge = dir > 0 ? page.scrollTop + page.clientHeight >= page.scrollHeight - 2 : page.scrollTop <= 1;
+        if (fresh) { gestureAtEdge = atEdge; acc = 0; }
+        if (!atEdge || !gestureAtEdge || now - this.lock < 650) return;
+        acc += Math.abs(e.deltaY);
+        if (acc > 60) { acc = 0; gestureAtEdge = false; this.step(dir); }
+      }, { passive: true });
+
+      // Keys: PageUp / PageDown at a screen's edge, ← / → when nothing interactive has focus
+      document.addEventListener('keydown', (e) => {
+        if (Sheet.isOpen() || e.altKey || e.ctrlKey || e.metaKey) return;
+        const t = e.target;
+        if (t.closest && t.closest('input, textarea, select, [contenteditable], [role="tab"], .orbit, .term-window, .proj-grid, .shots')) return;
+        const page = this.pages[this.i];
+        const idle = t === document.body || t === page || t.classList.contains('page');
+        if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && idle) { e.preventDefault(); this.step(e.key === 'ArrowRight' ? 1 : -1); return; }
+        if (e.key === 'PageDown' || e.key === 'PageUp') {
+          const dir = e.key === 'PageDown' ? 1 : -1;
+          const atEdge = dir > 0 ? page.scrollTop + page.clientHeight >= page.scrollHeight - 2 : page.scrollTop <= 1;
+          if (atEdge) { e.preventDefault(); this.step(dir); }
+        }
+      });
+
+      // Swipe left / right on phones (not on carousels, the orbit, the terminal or form fields)
+      let sx = 0, sy = 0, st = 0, skip = false;
+      deck.addEventListener('touchstart', (e) => {
+        const p = e.touches[0];
+        sx = p.clientX; sy = p.clientY; st = performance.now();
+        skip = !!e.target.closest('.proj-grid, .shots, .orbit, .marquee, .seg, .term-window, input, textarea, .sk-bento, .cbars, .journey__track');
+      }, { passive: true });
+      deck.addEventListener('touchend', (e) => {
+        if (skip || Sheet.isOpen()) return;
+        const p = e.changedTouches[0], dx = p.clientX - sx, dy = p.clientY - sy;
+        if (performance.now() - st < 700 && Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.6) this.step(dx < 0 ? 1 : -1);
+      }, { passive: true });
+    }
+  };
+
+  /* ======================================================================
      EVENTS
      ====================================================================== */
   const ACTIONS = {
@@ -899,6 +1063,20 @@
 
     document.addEventListener('click', (e) => {
       const t = e.target;
+      const an = t.closest('a[href^="#"]');
+      if (an && Pager.on) {
+        const id = an.getAttribute('href').slice(1) || 'top';
+        if (id === 'main') { e.preventDefault(); Pager.pages[Pager.i].focus(); return; }
+        if (document.getElementById(id)) { e.preventDefault(); Sheet.close(); goto(id); return; }
+      }
+      const pd = t.closest('[data-page]');
+      if (pd) { Pager.show(pd.dataset.page, { keepFocus: true }); return; }
+      const ps = t.closest('[data-page-step]');
+      if (ps) { Pager.step(+ps.dataset.pageStep); return; }
+      const pc = t.closest('[data-proj-scroll]');
+      if (pc) { const g = $('#proj-grid'); g.scrollBy({ left: +pc.dataset.projScroll * g.clientWidth * 0.8, behavior: 'smooth' }); return; }
+      const xp = t.closest('[data-xp]');
+      if (xp) { xpSel = +xp.dataset.xp; renderXp(); return; }
       const a = t.closest('[data-action]');
       if (a && ACTIONS[a.dataset.action]) { e.preventDefault(); ACTIONS[a.dataset.action](); return; }
       const pj = t.closest('[data-project]');
@@ -918,7 +1096,7 @@
       const sv = t.closest('[data-skill-view]');
       if (sv) { setSkillView(sv.dataset.skillView); return; }
       const rc = t.closest('[data-radar-cat]');
-      if (rc) { skillCat = rc.dataset.radarCat; renderSkills(); goto('skill-tabs'); return; }
+      if (rc) { skillCat = rc.dataset.radarCat; if (skillView === 'match') skillView = 'orbit'; renderSkills(); goto('skill-tabs'); return; }
       const fl = t.closest('[data-flip]');
       if (fl) { fl.setAttribute('aria-pressed', String(fl.getAttribute('aria-pressed') !== 'true')); return; }
       const pr = t.closest('[data-preset]');
@@ -927,13 +1105,13 @@
       if (sd) { stack.splice(stack.indexOf(sd.dataset.stackDel), 1); renderStack(); $('#skm-q').focus(); return; }
       if (t.closest('[data-stack-clear]')) { stack.length = 0; renderStack(); $('#skm-q').focus(); return; }
       const sa = t.closest('[data-stack-add]');
-      if (sa) { addStack(sa.dataset.stackAdd); Sheet.close(); goto('sk-match'); return; }
+      if (sa) { addStack(sa.dataset.stackAdd); Sheet.close(); setSkillView('match'); goto('skills'); return; }
       const wf = t.closest('[data-why-flip]');
       if (wf) { flipWhy(wf.closest('.why__card')); return; }
       const es = t.closest('[data-edu-step]');
       if (es) { setEduStep(+es.dataset.eduStep); return; }
       const rt = t.closest('[data-rx-tab]');
-      if (rt) { rxTab = rt.dataset.rxTab; renderRxPanel(); rt.focus(); return; }
+      if (rt) { rxTab = rt.dataset.rxTab; rxTable = false; renderRxPanel(); rt.focus(); return; }
       const rs = t.closest('[data-rx-scn]');
       if (rs) { rxScn = +rs.dataset.rxScn; renderRxPanel(); $('[data-rx-scn="' + rxScn + '"]').focus(); return; }
       if (t.closest('[data-rx-table]')) { rxTable = !rxTable; renderRxPanel(); $('[data-rx-table]').focus(); return; }
@@ -962,7 +1140,7 @@
     document.addEventListener('pointerover', (e) => { const s = e.target.closest('[data-skill]'); if (s && e.pointerType === 'mouse') HOS.showTip(s); });
     document.addEventListener('pointerout', (e) => { const s = e.target.closest('[data-skill]'); if (s && !s.contains(e.relatedTarget) && e.pointerType === 'mouse') HOS.hideTip(); });
     document.addEventListener('focusin', (e) => { const s = e.target.closest && e.target.closest('[data-skill]'); if (s && lastPointer !== 'touch') HOS.showTip(s); else if (!s) HOS.hideTip(); });
-    window.addEventListener('scroll', HOS.hideTip, { passive: true });
+    document.addEventListener('scroll', HOS.hideTip, { passive: true, capture: true });
 
     // Chart tooltips (research charts)
     document.addEventListener('pointerover', (e) => { const c = e.target.closest('[data-tip]'); if (c && e.pointerType === 'mouse') chartTip(c); });
@@ -983,9 +1161,10 @@
       else HOS.toast('Not in my toolkit yet, but I learn fast', 'sparkles');
     });
 
-    // Nav hairline appears once the page scrolls (like apple.com); progress bar tracks the page
+    // Without the pager: nav hairline + progress follow the window scroll (with it, Pager.sync drives the bar)
     const nav = $('#nav');
     const onScroll = () => {
+      if (Pager.on) return;
       nav.classList.toggle('is-scrolled', scrollY > 8);
       const max = document.documentElement.scrollHeight - innerHeight;
       nav.style.setProperty('--sp', max > 0 ? (scrollY / max).toFixed(4) : 0);
@@ -1001,34 +1180,15 @@
     $('#skill-used').addEventListener('change', filterSkills);
   }
 
-  /* Highlight the current section in the nav and tab bar */
-  function scrollSpy() {
-    if (!('IntersectionObserver' in window)) return;
-    const ids = ['top', 'overview', 'projects', 'skills', 'research', 'education', 'experience', 'playground', 'contact'];
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (!en.isIntersecting) return;
-        let id = en.target.id;
-        if (id === 'playground') id = 'experience';
-        $$('[data-spy]').forEach((l) => {
-          const on = l.dataset.spy === id || (id === 'overview' && l.dataset.spy === 'top' && l.closest('.tabbar'));
-          if (on) l.setAttribute('aria-current', 'true'); else l.removeAttribute('aria-current');
-        });
-      });
-    }, { rootMargin: '-45% 0px -50% 0px' });
-    ids.forEach((id) => { const el = document.getElementById(id); if (el) io.observe(el); });
-  }
-
   /* Fade sections in as they scroll into view; count up the stats once */
   function reveal() {
-    const els = $$('.sec-head, .ov-intro, .ov-stat, .why__card, .sk-me, .sk-match, .rx-paper, .rx-stat, .campus, .journey, .edu-tile, .xp, .term-window, .ccard, .mailform');
-    if (HOS.reduced() || !('IntersectionObserver' in window)) { HOS.countUp($('#bento')); return; }
+    const els = $$('.sec-head, .ov-intro, .why__card, .sk-me, .rx-paper, .rx-stat, .campus, .journey, .edu-tile, .xp-list, .term-window, .ccard, .mailform');
+    if (HOS.reduced() || !('IntersectionObserver' in window)) return;
     els.forEach((el) => el.classList.add('reveal'));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
         if (!en.isIntersecting) return;
         en.target.classList.add('is-in');
-        if (en.target.classList.contains('ov-intro')) HOS.countUp($('#bento'));
         io.unobserve(en.target);
       });
     }, { rootMargin: '0px 0px -8% 0px' });
@@ -1068,7 +1228,7 @@
     typer();
     initMarquee();
     spotlight();
-    scrollSpy();
+    Pager.init();
     reveal();
     lazyTerminal();
     // Old "HR Mode" links (…/#hr) open the 1-page résumé

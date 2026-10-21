@@ -28,6 +28,12 @@ hannahos/
 
 ## What's on the page
 
+**Screens, not a long scroll.** Each section is one screen (Home, Overview, Projects, Skills, Research, Education,
+Experience, Playground, Contact). Move between them with the nav, the dots / arrows at the bottom, the mouse wheel
+at the end of a screen, PageUp / PageDown, ← / →, or a swipe on phones. Links like `…/#research` open that screen.
+Without JavaScript the page falls back to a normal scrolling layout.
+
+
 - **Hero:** name, availability, tagline, and buttons for projects, résumé download and contact
 - **Overview:** intro card with a typing "Right now I'm…" line (edit `profile.doing`), four clickable stat tiles,
   a scrolling logo strip, and "why hire me" cards that flip to show proof

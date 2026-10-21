@@ -88,9 +88,11 @@
     </div>
   </header>
 
-  <main id="main">
-    <!-- ===== Hero ===== -->
-    <section class="hero" id="top" aria-labelledby="hero-name">
+  <main id="main" class="deck">
+    <!-- Each section is one "screen". With JS on, only one shows at a time (see pager in main.js). -->
+
+    <!-- ===== Home ===== -->
+    <section class="page hero" id="top" data-title="Home" aria-labelledby="hero-name">
       <div class="container hero__in">
         <div class="hero__avatar"><img src="assets/img/hannah.jpg" alt="Portrait of Hannah Lyn T. Santiago" width="120" height="120" data-photo></div>
         <p class="status-pill"><span class="pulse-dot"></span>Available for opportunities · Cebu City, PH</p>
@@ -102,87 +104,108 @@
           <a class="btn btn--tinted btn--lg" href="assets/resume/Hannah-Lyn-Santiago-Resume.pdf" download><span data-icon="download"></span>Download résumé</a>
           <a class="btn btn--plain btn--lg" href="#contact">Contact me <span data-icon="next"></span></a>
         </div>
+        <div class="home-stats" id="home-stats"></div>
       </div>
     </section>
 
-    <!-- ===== At a glance (bento) ===== -->
-    <section class="section" id="overview" aria-labelledby="overview-title">
+    <!-- ===== Overview ===== -->
+    <section class="page section" id="overview" data-title="Overview" aria-labelledby="overview-title">
       <div class="container">
         <header class="sec-head">
           <p class="eyebrow">Overview</p>
-          <h2 class="sec-title" id="overview-title">Hardware to software.<br><span class="muted">Tested before it ships.</span></h2>
+          <h2 class="sec-title" id="overview-title">Hardware to software. <span class="muted">Tested before it ships.</span></h2>
         </header>
-        <div class="ov" id="bento"></div>
-        <div class="marquee" id="ov-marquee"></div>
-        <div class="why" id="why"></div>
+        <div class="ov">
+          <div class="ov-left"><div class="ov-intro-host" id="ov-intro"></div><div class="marquee" id="ov-marquee"></div></div>
+          <div class="why" id="why"></div>
+        </div>
       </div>
     </section>
 
     <!-- ===== Projects ===== -->
-    <section class="section section--alt" id="projects" aria-labelledby="projects-title">
+    <section class="page section section--alt" id="projects" data-title="Projects" aria-labelledby="projects-title">
       <div class="container">
-        <header class="sec-head">
-          <p class="eyebrow">Projects</p>
-          <h2 class="sec-title" id="projects-title">Nine builds. Real results.</h2>
+        <header class="sec-head sec-head--row">
+          <div>
+            <p class="eyebrow">Projects</p>
+            <h2 class="sec-title" id="projects-title">Nine builds. <span class="muted">Real results.</span></h2>
+          </div>
           <p class="sec-lead">From inventory platforms to color-sorting robots. Tap any project for the details.</p>
         </header>
-        <div class="proj-filters" id="proj-filters"></div>
+        <div class="proj-bar">
+          <div class="proj-filters" id="proj-filters"></div>
+          <div class="proj-nav">
+            <button class="icon-btn" type="button" data-proj-scroll="-1" aria-label="Previous projects"><span data-icon="back"></span></button>
+            <button class="icon-btn" type="button" data-proj-scroll="1" aria-label="More projects"><span data-icon="next"></span></button>
+          </div>
+        </div>
         <div class="proj-grid" id="proj-grid"></div>
       </div>
     </section>
 
     <!-- ===== Skills ===== -->
-    <section class="section" id="skills" aria-labelledby="skills-title">
+    <section class="page section" id="skills" data-title="Skills" aria-labelledby="skills-title">
       <div class="container">
-        <header class="sec-head">
-          <p class="eyebrow">Skills</p>
-          <h2 class="sec-title" id="skills-title">The toolkit.<br><span class="muted">Explore it your way.</span></h2>
+        <header class="sec-head sec-head--row">
+          <div>
+            <p class="eyebrow">Skills</p>
+            <h2 class="sec-title" id="skills-title">The toolkit. <span class="muted">Explore it your way.</span></h2>
+          </div>
           <p class="sec-lead">Spin the orbit, search the grid, or check it against your team's stack.</p>
         </header>
-        <div class="sk-lab">
+        <div class="sk-layout">
           <article class="sk-me" id="sk-me" aria-label="Profile"></article>
-          <article class="sk-match" id="sk-match" aria-labelledby="skm-title"></article>
-        </div>
-        <div class="sk-tools">
-        <div class="sk-bar">
-          <div class="sk-search">
-            <span data-icon="search"></span>
-            <input id="skill-q" type="search" placeholder="Search skills, e.g. ESP32, React, testing" aria-label="Search skills" autocomplete="off">
+          <div class="sk-main" id="sk-main">
+            <div class="sk-tools">
+              <div class="sk-bar">
+                <div class="sk-search">
+                  <span data-icon="search"></span>
+                  <input id="skill-q" type="search" placeholder="Search skills, e.g. ESP32, React, testing" aria-label="Search skills" autocomplete="off">
+                </div>
+                <div class="seg sk-view" id="skill-view" role="group" aria-label="Skills view">
+                  <button class="seg__btn" type="button" data-skill-view="orbit" aria-pressed="true"><span data-icon="sparkles"></span>Orbit</button>
+                  <button class="seg__btn" type="button" data-skill-view="grid" aria-pressed="false"><span data-icon="grid"></span>Grid</button>
+                  <button class="seg__btn" type="button" data-skill-view="match" aria-pressed="false"><span data-icon="checkCircle"></span>Stack check</button>
+                </div>
+              </div>
+              <div class="seg-wrap"><div class="seg seg--scroll sk-tabs" id="skill-tabs" role="tablist" aria-label="Skill categories"></div></div>
+            </div>
+            <div class="sk-meta">
+              <p class="sk-count" id="skill-count" aria-live="polite"></p>
+              <label class="sk-toggle">
+                <input type="checkbox" id="skill-used" role="switch">
+                <span class="sk-toggle__track" aria-hidden="true"></span>
+                <span>Used in projects</span>
+              </label>
+            </div>
+            <div class="sk-stage">
+              <div class="orbit-wrap" id="skill-orbit"></div>
+              <div class="sk-bento" id="skill-groups" hidden></div>
+              <article class="sk-match" id="sk-match" aria-labelledby="skm-title" hidden></article>
+            </div>
           </div>
-          <label class="sk-toggle">
-            <input type="checkbox" id="skill-used" role="switch">
-            <span class="sk-toggle__track" aria-hidden="true"></span>
-            <span>Used in projects</span>
-          </label>
-          <div class="seg sk-view" id="skill-view" role="group" aria-label="Skills view">
-            <button class="seg__btn" type="button" data-skill-view="orbit" aria-pressed="true"><span data-icon="sparkles"></span>Orbit</button>
-            <button class="seg__btn" type="button" data-skill-view="grid" aria-pressed="false"><span data-icon="grid"></span>Grid</button>
-          </div>
         </div>
-        <div class="seg-wrap"><div class="seg seg--scroll sk-tabs" id="skill-tabs" role="tablist" aria-label="Skill categories"></div></div>
-        </div>
-        <p class="sk-count" id="skill-count" aria-live="polite"></p>
-        <div class="orbit-wrap" id="skill-orbit"></div>
-        <div class="sk-bento" id="skill-groups" hidden></div>
       </div>
     </section>
 
     <!-- ===== Research (public-safe summary of the approved thesis) ===== -->
-    <section class="section section--alt rx-sec" id="research" aria-labelledby="research-title">
+    <section class="page section section--alt rx-sec" id="research" data-title="Research" aria-labelledby="research-title">
       <div class="container" id="research-body"></div>
     </section>
 
     <!-- ===== Education (USJ-R) ===== -->
-    <section class="section edu-sec" id="education" aria-labelledby="education-title">
+    <section class="page section edu-sec" id="education" data-title="Education" aria-labelledby="education-title">
       <div class="container" id="education-body"></div>
     </section>
 
     <!-- ===== Experience ===== -->
-    <section class="section section--alt" id="experience" aria-labelledby="experience-title">
+    <section class="page section section--alt" id="experience" data-title="Experience" aria-labelledby="experience-title">
       <div class="container">
-        <header class="sec-head">
-          <p class="eyebrow">Experience</p>
-          <h2 class="sec-title" id="experience-title">Four years of showing up.</h2>
+        <header class="sec-head sec-head--row">
+          <div>
+            <p class="eyebrow">Experience</p>
+            <h2 class="sec-title" id="experience-title">Four years of showing up.</h2>
+          </div>
           <p class="sec-lead">READS Working Scholar from 2022 to 2026, alongside full-time engineering studies.</p>
         </header>
         <div class="exp" id="exp"></div>
@@ -190,11 +213,13 @@
     </section>
 
     <!-- ===== Terminal playground ===== -->
-    <section class="section" id="playground" aria-labelledby="play-title">
+    <section class="page section" id="playground" data-title="Playground" aria-labelledby="play-title">
       <div class="container">
-        <header class="sec-head">
-          <p class="eyebrow">Playground</p>
-          <h2 class="sec-title" id="play-title">Prefer the command line?</h2>
+        <header class="sec-head sec-head--row">
+          <div>
+            <p class="eyebrow">Playground</p>
+            <h2 class="sec-title" id="play-title">Prefer the command line?</h2>
+          </div>
           <p class="sec-lead">Type <code>help</code>, or try <code>sudo hire-hannah</code>.</p>
         </header>
         <div class="term-window">
@@ -205,30 +230,34 @@
     </section>
 
     <!-- ===== Contact ===== -->
-    <section class="section section--alt" id="contact" aria-labelledby="contact-title">
+    <section class="page section section--alt" id="contact" data-title="Contact" aria-labelledby="contact-title">
       <div class="container">
-        <header class="sec-head">
-          <p class="eyebrow">Contact</p>
-          <h2 class="sec-title" id="contact-title">Let's build something.</h2>
+        <header class="sec-head sec-head--row">
+          <div>
+            <p class="eyebrow">Contact</p>
+            <h2 class="sec-title" id="contact-title">Let's build something.</h2>
+          </div>
           <p class="sec-lead">Open to opportunities in embedded systems, software and QA. Email is the fastest way to reach me.</p>
         </header>
         <div class="contact" id="contact-body"></div>
+        <footer class="footer">
+          <div class="footer__in">
+            <p>© 2026 Hannah Lyn T. Santiago · Cebu City, Philippines</p>
+            <div class="footer__links">
+              <a href="https://www.linkedin.com/in/hannahlynsantiago/" target="_blank" rel="noopener">LinkedIn</a>
+              <a href="https://www.facebook.com/hannahlynsantiago26" target="_blank" rel="noopener">Facebook</a>
+              <button type="button" data-action="bugs">bugs_i_fixed.txt</button>
+              <a href="assets/resume/Hannah-Lyn-Santiago-Resume.pdf" download>Résumé PDF</a>
+              <a href="#top">Back to top</a>
+            </div>
+          </div>
+        </footer>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <div class="container footer__in">
-      <p>© 2026 Hannah Lyn T. Santiago · Cebu City, Philippines</p>
-      <div class="footer__links">
-        <a href="https://www.linkedin.com/in/hannahlynsantiago/" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://www.facebook.com/hannahlynsantiago26" target="_blank" rel="noopener">Facebook</a>
-        <button type="button" data-action="bugs">bugs_i_fixed.txt</button>
-        <a href="assets/resume/Hannah-Lyn-Santiago-Resume.pdf" download>Résumé PDF</a>
-        <a href="#top">Back to top</a>
-      </div>
-    </div>
-  </footer>
+  <!-- ===== Pager: dots + previous / next screen ===== -->
+  <nav class="pager" id="pager" aria-label="Screens" hidden></nav>
 
   <!-- ===== iPhone-style tab bar (phones) ===== -->
   <nav class="tabbar" aria-label="Quick navigation">
