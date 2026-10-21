@@ -80,6 +80,7 @@
         <a href="#experience" data-spy="experience">Experience</a>
         <a href="#contact" data-spy="contact">Contact</a>
       </nav>
+      <span class="nav__progress" aria-hidden="true"></span>
       <div class="nav__actions">
         <button class="icon-btn" type="button" data-action="theme" aria-label="Switch theme"><span class="theme-ico"></span></button>
         <button class="btn btn--primary btn--sm" type="button" data-action="resume">Résumé</button>
@@ -110,9 +111,9 @@
         <header class="sec-head">
           <p class="eyebrow">Overview</p>
           <h2 class="sec-title" id="overview-title">Hardware to software.<br><span class="muted">Tested before it ships.</span></h2>
-          <p class="sec-lead" id="about-text"></p>
         </header>
-        <div class="bento" id="bento"></div>
+        <div class="ov" id="bento"></div>
+        <div class="marquee" id="ov-marquee"></div>
         <div class="why" id="why"></div>
       </div>
     </section>
@@ -142,6 +143,7 @@
           <article class="sk-me" id="sk-me" aria-label="Profile"></article>
           <article class="sk-match" id="sk-match" aria-labelledby="skm-title"></article>
         </div>
+        <div class="sk-tools">
         <div class="sk-bar">
           <div class="sk-search">
             <span data-icon="search"></span>
@@ -157,7 +159,8 @@
             <button class="seg__btn" type="button" data-skill-view="grid" aria-pressed="false"><span data-icon="grid"></span>Grid</button>
           </div>
         </div>
-        <div class="seg-wrap"><div class="seg seg--scroll" id="skill-tabs" role="tablist" aria-label="Skill categories"></div></div>
+        <div class="seg-wrap"><div class="seg seg--scroll sk-tabs" id="skill-tabs" role="tablist" aria-label="Skill categories"></div></div>
+        </div>
         <p class="sk-count" id="skill-count" aria-live="polite"></p>
         <div class="orbit-wrap" id="skill-orbit"></div>
         <div class="sk-bento" id="skill-groups" hidden></div>
@@ -165,7 +168,7 @@
     </section>
 
     <!-- ===== Research (public-safe summary of the approved thesis) ===== -->
-    <section class="section section--ink ink" id="research" aria-labelledby="research-title">
+    <section class="section section--alt rx-sec" id="research" aria-labelledby="research-title">
       <div class="container" id="research-body"></div>
     </section>
 

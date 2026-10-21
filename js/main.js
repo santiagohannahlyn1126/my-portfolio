@@ -28,36 +28,117 @@
   }
 
   /* ======================================================================
-     OVERVIEW: about, bento stats, why hire me
+     OVERVIEW: intro card, stat tiles, logo marquee, flip "why hire me" cards
      ====================================================================== */
   function renderOverview() {
-    $('#about-text').textContent = P.about;
-    const [yrs, projs, tools, honors] = D.stats;
-    const sw = D.projects.filter((p) => p.cat === 'software').length;
+    const yrs = D.stats[0], honors = D.stats[3];
+    const sw = D.projects.filter((p) => p.cat === 'software').length, emb = D.projects.length - sw;
+    const logos = D.skills.filter((s) => s.logo);
+    const stack = logos.slice(0, 5);
     $('#bento').innerHTML =
-      '<article class="tile tile--hero">' +
-        '<p class="tile__eyebrow">Working scholar</p>' +
-        '<p class="tile__num grad-text" data-count="' + yrs.value + '" data-suffix="' + yrs.suffix + '">' + yrs.value + yrs.suffix + '</p>' +
-        '<p class="tile__label">years supporting a high-volume office while studying engineering full-time.</p>' +
-        '<p class="tile__sub">' + esc(yrs.sub) + ' · Registrar\'s Office, USJ-R</p>' +
+      '<article class="ov-intro">' +
+        '<div class="ov-intro__top">' +
+          '<span class="ov-intro__ph"><img src="' + esc(P.photo) + '" alt="" width="64" height="64"><i></i></span>' +
+          '<div><p class="ov-intro__hi">Hi, I\'m ' + esc(P.shortName) + '.</p><p class="ov-intro__role">' + esc(P.role) + ' · ' + esc(P.location) + '</p></div>' +
+        '</div>' +
+        '<p class="ov-intro__about">' + esc(P.about) + '</p>' +
+        '<p class="ov-intro__now"><span>Right now I\'m</span> <b class="typer" id="typer">' + esc(P.doing[0]) + '</b></p>' +
+        '<div class="ov-intro__cta">' +
+          '<button class="btn btn--primary btn--sm" type="button" data-goto="projects">' + icon('folder') + 'See my work</button>' +
+          '<button class="btn btn--tinted btn--sm" type="button" data-action="resume">' + icon('file') + 'Résumé</button>' +
+        '</div>' +
       '</article>' +
-      '<article class="tile">' +
-        '<p class="tile__num" data-count="' + projs.value + '">' + projs.value + '</p>' +
-        '<p class="tile__label">projects built</p><p class="tile__sub">' + sw + ' software · ' + (D.projects.length - sw) + ' embedded</p>' +
-      '</article>' +
-      '<article class="tile">' +
-        '<p class="tile__num" data-count="' + tools.value + '" data-suffix="' + tools.suffix + '">' + tools.value + tools.suffix + '</p>' +
-        '<p class="tile__label">languages, frameworks and tools</p><p class="tile__sub">' + esc(tools.sub) + '</p>' +
-      '</article>' +
-      '<article class="tile tile--wide">' +
-        '<span class="tile__icon" data-tint="orange">' + icon('award') + '</span>' +
-        '<div><p class="tile__big">' + esc(honors.text) + '</p><p class="tile__label">' + esc(honors.label) + ' · ' + esc(honors.sub) + '</p></div>' +
-      '</article>';
+      '<button class="ov-stat" type="button" data-goto="experience" data-tint="blue">' +
+        '<span class="ov-stat__head"><b class="ov-stat__num"><span data-count="' + yrs.value + '">' + yrs.value + '</span><small>yrs</small></b>' + icon('briefcase') + '</span>' +
+        '<span class="ov-stat__label">as a working scholar</span>' +
+        '<span class="ov-years">' + ['22', '23', '24', '25', '26'].map((y, i) => '<i style="--i:' + i + '"><em></em>&rsquo;' + y + '</i>').join('') + '</span>' +
+      '</button>' +
+      '<button class="ov-stat" type="button" data-goto="projects" data-tint="purple">' +
+        '<span class="ov-stat__head"><b class="ov-stat__num"><span data-count="' + D.projects.length + '">' + D.projects.length + '</span></b>' + icon('folder') + '</span>' +
+        '<span class="ov-stat__label">projects built</span>' +
+        '<span class="ov-split" style="--a:' + sw + ';--b:' + emb + '"><i></i><i></i></span>' +
+        '<span class="ov-split__key"><span>' + sw + ' software</span><span>' + emb + ' embedded</span></span>' +
+      '</button>' +
+      '<button class="ov-stat" type="button" data-goto="skills" data-tint="green">' +
+        '<span class="ov-stat__head"><b class="ov-stat__num"><span data-count="' + D.skills.length + '">' + D.skills.length + '</span></b>' + icon('cpu') + '</span>' +
+        '<span class="ov-stat__label">skills in the toolkit</span>' +
+        '<span class="ov-logos">' + stack.map((s) => '<i class="' + (s.dark ? 'is-dark' : '') + '">' + HOS.logo(s, { size: 18 }) + '</i>').join('') + '<em>+' + (D.skills.length - stack.length) + '</em></span>' +
+      '</button>' +
+      '<button class="ov-stat" type="button" data-goto="education" data-tint="orange">' +
+        '<span class="ov-stat__head"><b class="ov-stat__num ov-stat__num--text">' + esc(honors.text) + '</b>' + icon('award') + '</span>' +
+        '<span class="ov-stat__label">' + esc(honors.label) + ' · ' + esc(honors.sub) + '</span>' +
+        '<span class="ov-chip">' + icon('checkCircle') + 'Thesis approved · ' + esc(D.research.year) + '</span>' +
+      '</button>';
+
+    const chip = (s, hidden) => '<button class="mq' + (s.dark ? ' is-dark' : '') + '" type="button" data-skill-open="' + s.id + '"' + (hidden ? ' tabindex="-1" aria-hidden="true"' : '') + '>' +
+      HOS.logo(s, { size: 22 }) + '<span>' + esc(s.name) + '</span></button>';
+    $('#ov-marquee').innerHTML = '<p class="sr-only">Tools I use</p><div class="marquee__track">' +
+      logos.map((s) => chip(s, false)).join('') + logos.map((s) => chip(s, true)).join('') + '</div>';
 
     const tints = ['blue', 'green', 'purple'];
     $('#why').innerHTML = D.why.map((w, i) =>
-      '<article class="why__card"><span class="tile__icon" data-tint="' + tints[i] + '">' + icon(w.icon) + '</span>' +
-        '<h3>' + esc(w.title) + '</h3><p>' + esc(w.text) + '</p></article>').join('');
+      '<article class="why__card" data-tint="' + tints[i] + '">' +
+        '<div class="why__face why__front">' +
+          '<span class="tile__icon" data-tint="' + tints[i] + '">' + icon(w.icon) + '</span>' +
+          '<h3>' + esc(w.title) + '</h3><p>' + esc(w.text) + '</p>' +
+          '<button class="why__flip" type="button" data-why-flip>' + icon('refresh') + 'Show proof</button>' +
+        '</div>' +
+        '<div class="why__face why__back" aria-hidden="true">' +
+          '<p class="why__kicker">' + icon('checkCircle') + 'Proof</p>' +
+          '<p class="why__proof">' + esc(w.proof) + '</p>' +
+          '<div class="why__acts">' +
+            '<button class="btn btn--primary btn--sm" type="button" tabindex="-1" ' + (w.project ? 'data-project="' + w.project + '"' : 'data-goto="' + w.go + '"') + '>' + esc(w.cta) + icon('next') + '</button>' +
+            '<button class="why__flip" type="button" tabindex="-1" data-why-flip>' + icon('back') + 'Back</button>' +
+          '</div>' +
+        '</div>' +
+      '</article>').join('');
+  }
+
+  function flipWhy(card) {
+    const on = !card.classList.contains('is-flipped');
+    card.classList.toggle('is-flipped', on);
+    $('.why__front', card).setAttribute('aria-hidden', String(on));
+    $('.why__back', card).setAttribute('aria-hidden', String(!on));
+    $$('.why__front button', card).forEach((b) => { b.tabIndex = on ? -1 : 0; });
+    $$('.why__back button', card).forEach((b) => { b.tabIndex = on ? 0 : -1; });
+    $((on ? '.why__back' : '.why__front') + ' [data-why-flip]', card).focus({ preventScroll: true });
+  }
+
+  /** "Right now I'm …" typewriter (just swaps the text when motion is reduced). */
+  function typer() {
+    const el = $('#typer'), words = P.doing;
+    if (!el || !words || words.length < 2) return;
+    let w = 0;
+    const next = () => {
+      w = (w + 1) % words.length;
+      const word = words[w];
+      if (HOS.reduced()) { el.textContent = word; setTimeout(next, 3200); return; }
+      const type = (i) => {
+        el.textContent = word.slice(0, i);
+        if (i < word.length) setTimeout(() => type(i + 1), 55);
+        else setTimeout(next, 2200);
+      };
+      const erase = () => {
+        const txt = el.textContent;
+        if (txt.length) { el.textContent = txt.slice(0, -1); setTimeout(erase, 26); }
+        else type(1);
+      };
+      erase();
+    };
+    setTimeout(next, 2600);
+  }
+
+  /** Cursor-following glow on cards (mouse only). */
+  function spotlight() {
+    const SPOT = '.ov-intro, .ov-stat, .why__card, .pcard, .xp, .rx-stat, .rx-chart, .edu-tile, .journey, .sk-me, .sk-match';
+    document.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const el = e.target.closest && e.target.closest(SPOT);
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
   }
 
   /* ======================================================================
@@ -304,7 +385,7 @@
     let k = 0;
     const rings = radii.map((r, ri) => {
       const list = sorted.slice(k, k += sizes[ri]);
-      return '<div class="orbit__ring" style="--r:' + r + 'cqw;--dur:' + (90 + ri * 40) + 's;--dir:' + (ri % 2 ? 'reverse' : 'normal') + ';--inv:' + (ri % 2 ? 'normal' : 'reverse') + '">' +
+      return '<div class="orbit__ring" style="--r:' + r + 'cqw">' +
         list.map((s, i) => {
           const n = usedIn(s.id);
           return '<button class="orb' + (s.dark ? ' is-dark' : '') + (s.glyph ? ' is-glyph' : '') + '" type="button" data-skill="' + s.id + '" data-cat="' + s.cat + '"' +
@@ -317,7 +398,86 @@
       '<div class="orbit" role="group" aria-label="Skills orbit. Skills closer to the center are used in more projects.">' + rings +
         '<div class="orbit__core"><img src="' + esc(P.photo) + '" alt="" width="120" height="120"></div>' +
       '</div>' +
-      '<p class="orbit__legend"><span><i class="orbit__dot"></i>Closer to the center = used in more projects</span><span>Hover to pause · tap a logo for details</span></p>';
+      '<p class="orbit__legend"><span><i class="orbit__dot"></i>Closer to the center = used in more projects</span><span>' + icon('refresh') + 'Drag to spin · toss a logo · tap for details</span></p>';
+    HOS.fillIcons($('#skill-orbit'));
+  }
+
+  /** Orbit physics: slow auto-spin, drag to spin (with momentum), drag a logo to toss it (it springs back). */
+  function initOrbit() {
+    const orbit = $('.orbit');
+    if (!orbit) return;
+    const rings = $$('.orbit__ring', orbit);
+    const SPEED = [6, -4.5, 3];                       // auto-spin per ring, degrees per second
+    const base = rings.map(() => 0);
+    let offset = 0, vel = 0, hover = false, live = true, last = performance.now(), drag = null;
+    const center = () => { const r = orbit.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+    const angle = (e) => { const c = center(); return Math.atan2(e.clientY - c[1], e.clientX - c[0]) * 180 / Math.PI; };
+
+    const frame = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (live && orbit.offsetParent) {
+        if (!HOS.reduced() && !hover && !drag) rings.forEach((_, i) => { base[i] += SPEED[i] * dt; });
+        if (!drag && Math.abs(vel) > 0.5) { offset += vel * dt; vel *= Math.pow(0.04, dt); }
+        rings.forEach((r, i) => r.style.setProperty('--rot', (base[i] + offset).toFixed(2) + 'deg'));
+      }
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+    if ('IntersectionObserver' in window) new IntersectionObserver((en) => { live = en[0].isIntersecting; }).observe(orbit);
+
+    orbit.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hover = true; });
+    orbit.addEventListener('pointerleave', () => { hover = false; });
+    orbit.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      drag = { x: e.clientX, y: e.clientY, orb: e.target.closest('.orb'), mode: null, ang: angle(e), t: performance.now(), v: 0 };
+      vel = 0;
+    });
+    orbit.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.mode) {
+        if (Math.hypot(dx, dy) < 6) return;
+        drag.mode = drag.orb ? 'toss' : 'spin';
+        try { orbit.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or finished pointer */ }
+        orbit.classList.add('is-grabbing');
+        if (drag.orb) drag.orb.classList.add('is-held');
+        HOS.hideTip();
+      }
+      if (drag.mode === 'toss') {
+        drag.orb.style.setProperty('--dx', dx + 'px');
+        drag.orb.style.setProperty('--dy', dy + 'px');
+      } else {
+        const a = angle(e), now = performance.now();
+        let d = a - drag.ang;
+        if (d > 180) d -= 360;
+        if (d < -180) d += 360;
+        offset += d;
+        drag.v = 0.7 * drag.v + 0.3 * (d / Math.max(0.008, (now - drag.t) / 1000));
+        drag.ang = a; drag.t = now;
+      }
+    });
+    const end = (cancel) => {
+      if (!drag) return;
+      const d = drag;
+      drag = null;
+      orbit.classList.remove('is-grabbing');
+      if (d.mode === 'toss') {
+        d.orb.classList.remove('is-held');
+        d.orb.style.removeProperty('--dx');
+        d.orb.style.removeProperty('--dy');
+      } else if (d.mode === 'spin') {
+        vel = Math.max(-720, Math.min(720, d.v));
+      } else if (!cancel && d.orb) {
+        HOS.hideTip();
+        openSkill(d.orb.dataset.skill);
+      }
+    };
+    orbit.addEventListener('pointerup', () => end(false));
+    orbit.addEventListener('pointercancel', () => end(true));
+    // Keyboard: left / right arrows give the orbit a spin
+    orbit.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); vel = e.key === 'ArrowRight' ? 240 : -240; }
+    });
   }
 
   function renderSkills() {
@@ -744,6 +904,8 @@
       if (t.closest('[data-stack-clear]')) { stack.length = 0; renderStack(); $('#skm-q').focus(); return; }
       const sa = t.closest('[data-stack-add]');
       if (sa) { addStack(sa.dataset.stackAdd); Sheet.close(); goto('sk-match'); return; }
+      const wf = t.closest('[data-why-flip]');
+      if (wf) { flipWhy(wf.closest('.why__card')); return; }
       const es = t.closest('[data-edu-step]');
       if (es) { setEduStep(+es.dataset.eduStep); return; }
       const rt = t.closest('[data-rx-tab]');
@@ -752,6 +914,7 @@
       if (rs) { rxScn = +rs.dataset.rxScn; renderRxPanel(); $('[data-rx-scn="' + rxScn + '"]').focus(); return; }
       if (t.closest('[data-rx-table]')) { rxTable = !rxTable; renderRxPanel(); $('[data-rx-table]').focus(); return; }
       const sk = t.closest('.sk-card [data-skill], .orbit [data-skill]');
+      if (sk && sk.closest('.orbit') && e.detail) return;   // pointer taps on the orbit are handled by initOrbit
       if (sk) { HOS.hideTip(); openSkill(sk.dataset.skill); return; }
       const cp = t.closest('[data-copy]');
       if (cp) { HOS.copy(cp.dataset.copy); return; }
@@ -796,9 +959,13 @@
       else HOS.toast('Not in my toolkit yet, but I learn fast', 'sparkles');
     });
 
-    // Nav hairline appears once the page scrolls (like apple.com)
+    // Nav hairline appears once the page scrolls (like apple.com); progress bar tracks the page
     const nav = $('#nav');
-    const onScroll = () => nav.classList.toggle('is-scrolled', scrollY > 8);
+    const onScroll = () => {
+      nav.classList.toggle('is-scrolled', scrollY > 8);
+      const max = document.documentElement.scrollHeight - innerHeight;
+      nav.style.setProperty('--sp', max > 0 ? (scrollY / max).toFixed(4) : 0);
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
@@ -830,14 +997,14 @@
 
   /* Fade sections in as they scroll into view; count up the stats once */
   function reveal() {
-    const els = $$('.sec-head, .tile, .why__card, .sk-me, .sk-match, .rx-paper, .rx-stat, .campus, .journey, .edu-tile, .xp, .term-window, .ccard, .mailform');
+    const els = $$('.sec-head, .ov-intro, .ov-stat, .why__card, .sk-me, .sk-match, .rx-paper, .rx-stat, .campus, .journey, .edu-tile, .xp, .term-window, .ccard, .mailform');
     if (HOS.reduced() || !('IntersectionObserver' in window)) { HOS.countUp($('#bento')); return; }
     els.forEach((el) => el.classList.add('reveal'));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
         if (!en.isIntersecting) return;
         en.target.classList.add('is-in');
-        if (en.target.classList.contains('tile--hero')) HOS.countUp($('#bento'));
+        if (en.target.classList.contains('ov-intro')) HOS.countUp($('#bento'));
         io.unobserve(en.target);
       });
     }, { rootMargin: '0px 0px -8% 0px' });
@@ -863,6 +1030,7 @@
     renderMe();
     renderMatch();
     renderOrbit();
+    initOrbit();
     renderSkills();
     renderResearch();
     renderEducation();
@@ -873,6 +1041,8 @@
     HOS.applyTheme(document.documentElement.dataset.theme);
     bindEvents();
     tiltCampus();
+    typer();
+    spotlight();
     scrollSpy();
     reveal();
     lazyTerminal();

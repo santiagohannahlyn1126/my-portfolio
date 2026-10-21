@@ -29,10 +29,11 @@ hannahos/
 ## What's on the page
 
 - **Hero:** name, availability, tagline, and buttons for projects, résumé download and contact
-- **Overview:** an Apple-style bento grid of stats plus three reasons to hire
+- **Overview:** intro card with a typing "Right now I'm…" line (edit `profile.doing`), four clickable stat tiles,
+  a scrolling logo strip, and "why hire me" cards that flip to show proof
 - **Projects:** a segmented control (All · Software · Embedded · QA). Tap a card to open an App Store-style detail sheet.
 - **Skills:** a profile card (flip photo + radar of hands-on depth), a "Does Hannah fit your stack?" matcher with presets,
-  and two views: a spinning **Orbit** (most-used skills closest to the center) or the logo **Grid**. Tap any skill for details.
+  and two views: an **Orbit** you can drag to spin or toss logos around (most-used skills closest to the center) or the logo **Grid**. Tap any skill for details.
 - **Research:** public-safe summary of the approved thesis, with interactive findings charts. Content lives in `research` in `js/data.js`.
   Investigator identities, case records, sketches, locations and transcripts are deliberately left out. Don't add the PDF.
 - **Education:** USJ-R campus card (seal, campus photo, motto, 3D tilt) plus a clickable journey timeline. Edit it in `school` in `js/data.js`.

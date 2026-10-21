@@ -31,6 +31,8 @@ window.HOS_DATA = {
     photo: 'assets/img/hannah.jpg',
     photoAlt: 'assets/img/hannah-formal.jpg',   // second portrait, shown when the skills card flips
     status: 'Available for opportunities',
+    // Rotating "Right now I'm…" line in Overview
+    doing: ['wiring up an ESP32', 'shipping React + PHP apps', 'writing test cases', 'designing PCBs', 'building .NET MAUI apps', 'breaking things before users do'],
     about: 'Computer Engineer trained at University of San Jose–Recoletos. ' +
       'I work across the full stack, from microcontrollers and PCBs to web, desktop and mobile apps, ' +
       'with a QA mindset that catches issues early.'
@@ -45,9 +47,12 @@ window.HOS_DATA = {
 
   /* "Why hire her?" — three reasons, shown on About, HR Mode and the résumé */
   why: [
-    { icon: 'layers',  title: 'Full-stack range', text: 'Ships firmware, circuit boards and web, desktop and mobile apps.' },
-    { icon: 'shield',  title: 'QA instinct',      text: 'Tests business rules and edge cases before users ever see them.' },
-    { icon: 'clock',   title: 'Proven reliability', text: '4+ years supporting a busy office while studying engineering full-time.' }
+    { icon: 'layers',  title: 'Full-stack range', text: 'Ships firmware, circuit boards and web, desktop and mobile apps.',
+      proof: '9 projects, from ESP32 firmware and PCBs to React, PHP and .NET MAUI apps.', cta: 'See projects', go: 'projects' },
+    { icon: 'shield',  title: 'QA instinct',      text: 'Tests business rules and edge cases before users ever see them.',
+      proof: 'QA lead on the Xeleqt inventory system: stock rules, edge cases and data validation.', cta: 'Open Xeleqt', project: 'xeleqt' },
+    { icon: 'clock',   title: 'Proven reliability', text: '4 years supporting a busy office while studying engineering full-time.',
+      proof: 'READS Working Scholar at the Office of the Registrar, 2022 – 2026.', cta: 'See experience', go: 'experience' }
   ],
 
   experience: [
