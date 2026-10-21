@@ -1,6 +1,6 @@
 /* ==========================================================================
    Page: renders every section from data.js and wires up interactions
-   Overview · Projects (+ sheets) · Skills · Experience · Terminal · Contact
+   Overview · Projects (+ sheets) · Skills · Research · Experience · Terminal · Contact
    ========================================================================== */
 
 (function () {
@@ -170,12 +170,155 @@
   }
 
   /* ======================================================================
-     SKILLS: category segmented control + logo tiles
+     SKILLS: profile card + radar, stack matcher, orbit / grid views
      ====================================================================== */
   let skillCat = 'all';
+  let skillView = HOS.store.get('hos-skill-view', 'orbit') === 'grid' ? 'grid' : 'orbit';
+  const stack = [];
   const CAT_TINT = { lang: 'blue', web: 'purple', db: 'green', hw: 'orange', plat: 'pink', tools: 'blue', qa: 'green', soft: 'purple' };
   const CAT_WIDE = { lang: 1, tools: 1 };          // big categories span the full row
+  const CAT_SHORT = { lang: 'Languages', web: 'Web', db: 'Databases', hw: 'Hardware', plat: 'Platforms', tools: 'Tools', qa: 'QA' };
   const usedIn = (id) => HOS.projectsForSkill(id).length;
+  const PRESETS = [
+    { name: 'Embedded & IoT', icon: 'chip', ids: ['esp32', 'micropython', 'embeddedc', 'pcb'] },
+    { name: 'Full-stack web', icon: 'layout', ids: ['react', 'typescript', 'php', 'mysql'] },
+    { name: 'Mobile .NET', icon: 'phone', ids: ['maui', 'csharp', 'xaml', 'android'] },
+    { name: 'QA', icon: 'shield', ids: ['functional', 'system', 'validation', 'defects'] }
+  ];
+
+  /** How many projects use each technical area (soft skills are listed separately). */
+  function areaDepth() {
+    return D.skillCategories.filter((c) => CAT_SHORT[c.id]).map((c) => {
+      const seen = {};
+      D.skills.filter((s) => s.cat === c.id).forEach((s) => HOS.projectsForSkill(s.id).forEach((p) => { seen[p.id] = 1; }));
+      return { c, n: Object.keys(seen).length };
+    });
+  }
+
+  function radarSVG(data) {
+    const max = D.projects.length, N = data.length, cx = 180, cy = 142, R = 92;
+    const pt = (i, r) => { const a = -Math.PI / 2 + i * 2 * Math.PI / N; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; };
+    const xy = (p) => p[0].toFixed(1) + ',' + p[1].toFixed(1);
+    const poly = (r) => data.map((_, i) => xy(pt(i, r))).join(' ');
+    return '<svg class="radar" viewBox="0 0 360 280" aria-hidden="true">' +
+      [1 / 3, 2 / 3, 1].map((f) => '<polygon class="radar__ring" points="' + poly(R * f) + '"/>').join('') +
+      data.map((_, i) => { const p = pt(i, R); return '<line class="radar__spoke" x1="' + cx + '" y1="' + cy + '" x2="' + p[0].toFixed(1) + '" y2="' + p[1].toFixed(1) + '"/>'; }).join('') +
+      '<polygon class="radar__shape" points="' + data.map((d, i) => xy(pt(i, R * d.n / max))).join(' ') + '"/>' +
+      data.map((d, i) => { const p = pt(i, R * d.n / max); return '<circle class="radar__dot" data-axis="' + d.c.id + '" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4.5"/>'; }).join('') +
+      data.map((d, i) => {
+        const p = pt(i, R + 16), anchor = Math.abs(p[0] - cx) < 4 ? 'middle' : p[0] > cx ? 'start' : 'end';
+        return '<text class="radar__label" data-axis="' + d.c.id + '" x="' + p[0].toFixed(1) + '" y="' + p[1].toFixed(1) + '" text-anchor="' + anchor + '" dominant-baseline="middle">' + CAT_SHORT[d.c.id] + '</text>';
+      }).join('') +
+    '</svg>';
+  }
+
+  /** Profile card: flip photo, quick numbers, radar of hands-on depth. */
+  function renderMe() {
+    const data = areaDepth();
+    const soft = D.skills.filter((s) => s.cat === 'soft');
+    $('#sk-me').innerHTML =
+      '<div class="sk-me__top">' +
+        '<button class="flip" type="button" data-flip aria-pressed="false" aria-label="Flip to see another portrait">' +
+          '<span class="flip__in"><img class="flip__face" src="' + esc(P.photo) + '" alt="Portrait of ' + esc(P.name) + '" width="112" height="112">' +
+          '<img class="flip__face flip__back" src="' + esc(P.photoAlt || P.photo) + '" alt="" width="112" height="112" loading="lazy"></span>' +
+          '<span class="flip__hint">' + icon('refresh') + '</span>' +
+        '</button>' +
+        '<div class="sk-me__id">' +
+          '<p class="ps__cat">Player profile</p>' +
+          '<h3>' + esc(P.name) + '</h3>' +
+          '<p>' + esc(P.role) + ' · ' + esc(P.location) + '</p>' +
+          '<p class="sk-me__status"><span class="pulse-dot"></span>' + esc(P.status) + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<dl class="sk-me__nums">' +
+        '<div><dd>' + D.skills.length + '</dd><dt>skills</dt></div>' +
+        '<div><dd>' + D.projects.length + '</dd><dt>projects</dt></div>' +
+        '<div><dd>' + D.skillCategories.length + '</dd><dt>areas</dt></div>' +
+      '</dl>' +
+      '<h4 class="sk-me__h">Where I go deepest<small>Projects that use each area, out of ' + D.projects.length + '</small></h4>' +
+      radarSVG(data) +
+      '<div class="radar__keys">' + data.map((d) =>
+        '<button class="radar__key" type="button" data-radar-cat="' + d.c.id + '"><span>' + esc(d.c.name) + '</span><b>' + d.n + '/' + D.projects.length + '</b></button>').join('') + '</div>' +
+      '<p class="sk-me__soft"><b>Also brings</b>' + soft.map((s) =>
+        '<button class="tag" type="button" data-skill-open="' + s.id + '">' + HOS.logo(s, { size: 16 }) + esc(s.name) + '</button>').join('') + '</p>';
+  }
+
+  /* ---------- "Does Hannah fit your stack?" ---------- */
+  function renderMatch() {
+    $('#sk-match').innerHTML =
+      '<header class="skm__head"><span class="tile__icon" data-tint="green">' + icon('checkCircle') + '</span>' +
+        '<div><h3 id="skm-title">Does Hannah fit your stack?</h3><p>Pick your team\'s tools and see where I\'ve used them.</p></div></header>' +
+      '<div class="skm__presets">' + PRESETS.map((p, i) =>
+        '<button class="skm__preset" type="button" data-preset="' + i + '">' + icon(p.icon) + esc(p.name) + '</button>').join('') + '</div>' +
+      '<form class="skm__add" autocomplete="off">' +
+        '<label class="sr-only" for="skm-q">Add a skill to your stack</label>' +
+        '<input id="skm-q" list="skm-list" placeholder="Add a tool, e.g. Python">' +
+        '<button class="btn btn--primary btn--sm" type="submit">' + icon('check') + 'Add</button>' +
+        '<datalist id="skm-list">' + D.skills.map((s) => '<option value="' + esc(s.name) + '"></option>').join('') + '</datalist>' +
+      '</form>' +
+      '<div class="skm__tray" id="skm-tray"></div>' +
+      '<div class="skm__result" id="skm-result" aria-live="polite"></div>';
+    renderStack();
+  }
+
+  function addStack(id) {
+    if (stack.indexOf(id) > -1) return;
+    if (stack.length >= 8) { HOS.toast('Up to 8 tools at a time', 'info'); return; }
+    stack.push(id);
+    renderStack();
+  }
+
+  function renderStack() {
+    $('#skm-tray').innerHTML = stack.map((id) => {
+      const s = HOS.skillById(id);
+      return '<span class="tag skm__chip' + (s.dark ? ' is-dark' : '') + '">' + HOS.logo(s, { size: 16 }) + esc(s.name) +
+        '<button type="button" data-stack-del="' + id + '" aria-label="Remove ' + esc(s.name) + '">' + icon('close') + '</button></span>';
+    }).join('') + (stack.length ? '<button class="btn btn--plain btn--sm" type="button" data-stack-clear>Clear</button>' : '');
+
+    const out = $('#skm-result');
+    if (!stack.length) {
+      out.innerHTML = '<div class="skm__empty">' + icon('layers') + '<span>Your stack shows up here. Try a preset above.</span></div>';
+      return;
+    }
+    const hands = stack.filter((id) => usedIn(id));
+    const pct = Math.round(hands.length / stack.length * 100);
+    const ranked = D.projects.map((p) => ({ p, hit: stack.filter((id) => HOS.projectsForSkill(id).indexOf(p) > -1) }))
+      .filter((x) => x.hit.length).sort((a, b) => b.hit.length - a.hit.length).slice(0, 3);
+    out.innerHTML =
+      '<div class="skm__score">' +
+        '<span class="skm__ring" style="--p:' + pct + '"><b>' + hands.length + '/' + stack.length + '</b></span>' +
+        '<div><b>' + (pct === 100 ? 'Every tool used in a real project' : hands.length ? hands.length + ' of ' + stack.length + ' used in real projects' : 'Known from coursework and lab work') + '</b>' +
+        '<span>' + stack.map((id) => '<i class="skm__pip' + (usedIn(id) ? ' is-on' : '') + '" title="' + esc(HOS.skillById(id).name) + (usedIn(id) ? ': used in projects' : ': coursework') + '"></i>').join('') + '</span></div>' +
+      '</div>' +
+      (ranked.length ? '<h4 class="ps__h">Best matching projects</h4><div class="list">' + ranked.map((x) =>
+        '<button class="skd__proj" type="button" data-project="' + x.p.id + '"><img src="' + esc(x.p.cover || thumb(x.p)) + '" alt="" width="72" height="45" loading="lazy">' +
+        '<span><b>' + esc(x.p.title) + '</b><small>Uses ' + x.hit.map((id) => esc(HOS.skillById(id).name)).join(', ') + '</small></span>' + icon('next') + '</button>').join('') + '</div>' : '');
+  }
+
+  /* ---------- Orbit view: most-used skills sit closest to the center ---------- */
+  function renderOrbit() {
+    const sorted = D.skills.slice().sort((a, b) => usedIn(b.id) - usedIn(a.id));
+    const radii = [19, 30.5, 42], total = radii.reduce((a, b) => a + b, 0);
+    const sizes = [Math.round(sorted.length * radii[0] / total), Math.round(sorted.length * radii[1] / total)];
+    sizes.push(sorted.length - sizes[0] - sizes[1]);
+    let k = 0;
+    const rings = radii.map((r, ri) => {
+      const list = sorted.slice(k, k += sizes[ri]);
+      return '<div class="orbit__ring" style="--r:' + r + 'cqw;--dur:' + (90 + ri * 40) + 's;--dir:' + (ri % 2 ? 'reverse' : 'normal') + ';--inv:' + (ri % 2 ? 'normal' : 'reverse') + '">' +
+        list.map((s, i) => {
+          const n = usedIn(s.id);
+          return '<button class="orb' + (s.dark ? ' is-dark' : '') + (s.glyph ? ' is-glyph' : '') + '" type="button" data-skill="' + s.id + '" data-cat="' + s.cat + '"' +
+            ' data-used="' + (n ? 1 : 0) + '" data-search="' + esc((s.name + ' ' + (s.note || '')).toLowerCase()) + '"' +
+            ' style="--a:' + (ri * 17 + i * 360 / list.length).toFixed(1) + 'deg;--brand:' + (s.brand || 'var(--accent)') + '">' +
+            '<span class="orb__in">' + HOS.logo(s, { size: 28 }) + '</span><span class="sr-only">' + esc(s.name) + (n ? ', used in ' + n + ' projects' : '') + '</span></button>';
+        }).join('') + '</div>';
+    }).join('');
+    $('#skill-orbit').innerHTML =
+      '<div class="orbit" role="group" aria-label="Skills orbit. Skills closer to the center are used in more projects.">' + rings +
+        '<div class="orbit__core"><img src="' + esc(P.photo) + '" alt="" width="120" height="120"></div>' +
+      '</div>' +
+      '<p class="orbit__legend"><span><i class="orbit__dot"></i>Closer to the center = used in more projects</span><span>Hover to pause · tap a logo for details</span></p>';
+  }
 
   function renderSkills() {
     const cats = [{ id: 'all', name: 'All' }].concat(D.skillCategories);
@@ -206,24 +349,39 @@
     }).join('') + '<div class="empty sk-empty" hidden>' + icon('search') + '<b>No skills match</b><span>Try another word, or clear the filters.</span>' +
       '<button class="btn btn--tinted btn--sm" type="button" data-skill-reset>Clear filters</button></div>';
     HOS.fillIcons($('#skill-groups'));
+    setSkillView(skillView);
+  }
+
+  function setSkillView(v) {
+    skillView = v;
+    HOS.store.set('hos-skill-view', v);
+    $('#skill-orbit').hidden = v !== 'orbit';
+    $('#skill-groups').hidden = v !== 'grid';
+    $$('[data-skill-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.skillView === v)));
     filterSkills();
   }
 
-  /** Live search + "used in projects" toggle, without re-rendering (keeps focus in the field). */
+  /** Live search + "used in projects" toggle + category, without re-rendering (keeps focus in the field). */
   function filterSkills() {
     const q = $('#skill-q').value.trim().toLowerCase();
     const onlyUsed = $('#skill-used').checked;
+    const match = (t, cat) => (!q || t.dataset.search.indexOf(q) > -1 || cat === q) && (!onlyUsed || t.dataset.used === '1');
     let shown = 0;
-    $$('.sk-card').forEach((card) => {
-      let n = 0;
-      $$('.skill', card).forEach((t) => {
-        const ok = (!q || t.dataset.search.indexOf(q) > -1 || card.dataset.cat === q) && (!onlyUsed || t.dataset.used === '1');
-        t.hidden = !ok; if (ok) n++;
+    if (skillView === 'orbit') {
+      $$('.orb').forEach((t) => {
+        const ok = match(t, t.dataset.cat) && (skillCat === 'all' || t.dataset.cat === skillCat);
+        t.classList.toggle('is-dim', !ok); t.tabIndex = ok ? 0 : -1; if (ok) shown++;
       });
-      card.hidden = !n; shown += n;
-    });
-    $('.sk-empty').hidden = shown > 0;
-    $('#skill-count').textContent = (q || onlyUsed) ? 'Showing ' + shown + ' of ' + D.skills.length + ' skills' : D.skills.length + ' skills across ' + D.skillCategories.length + ' categories';
+    } else {
+      $$('.sk-card').forEach((card) => {
+        let n = 0;
+        $$('.skill', card).forEach((t) => { const ok = match(t, card.dataset.cat); t.hidden = !ok; if (ok) n++; });
+        card.hidden = !n; shown += n;
+      });
+      $('.sk-empty').hidden = shown > 0;
+    }
+    const filtered = q || onlyUsed || skillCat !== 'all';
+    $('#skill-count').textContent = filtered ? 'Showing ' + shown + ' of ' + D.skills.length + ' skills' : D.skills.length + ' skills across ' + D.skillCategories.length + ' categories';
   }
 
   /** Skill detail sheet: where it was used + skills it was paired with. */
@@ -250,7 +408,108 @@
           const o = HOS.skillById(t);
           return '<button class="tag' + (o.dark ? ' is-dark' : '') + '" type="button" data-skill-open="' + t + '">' + HOS.logo(o, { size: 16 }) + esc(o.name) + '</button>';
         }).join('') + '</div>' : '') +
-      (projs.length ? '<div class="skd__actions"><button class="btn btn--primary btn--sm" type="button" data-tech="' + id + '">' + icon('folder') + 'Show these projects</button></div>' : ''));
+      '<div class="skd__actions">' +
+        (projs.length ? '<button class="btn btn--primary btn--sm" type="button" data-tech="' + id + '">' + icon('folder') + 'Show these projects</button>' : '') +
+        '<button class="btn btn--tinted btn--sm" type="button" data-stack-add="' + id + '">' + icon('layers') + 'Add to stack check</button>' +
+      '</div>');
+  }
+
+  /* ======================================================================
+     RESEARCH: public-safe summary of the approved thesis
+     ====================================================================== */
+  const RX_TABS = [['findings', 'Findings'], ['questions', 'Questions'], ['method', 'Method'], ['solution', 'Solution']];
+  let rxTab = 'findings', rxScn = 1, rxTable = false;
+  const pctf = (v) => (Math.round(v * 10) / 10) + '%';
+
+  function renderResearch() {
+    const R = D.research;
+    $('#research-body').innerHTML =
+      '<header class="sec-head">' +
+        '<p class="eyebrow">Research</p>' +
+        '<h2 class="sec-title" id="research-title">' + esc(R.short.replace(/, (.*)$/, ',')) + '<br><span class="muted">' + esc(R.short.replace(/^.*?, /, '')) + '.</span></h2>' +
+        '<p class="sec-lead">' + esc(R.pitch) + '</p>' +
+      '</header>' +
+      '<article class="rx-paper">' +
+        '<span class="tile__icon" data-tint="green">' + icon('file') + '</span>' +
+        '<div class="rx-paper__main">' +
+          '<p class="rx-paper__meta"><span class="badge-now">' + icon('checkCircle') + esc(R.status) + ' · ' + esc(R.year) + '</span>' + esc(R.kind) + '</p>' +
+          '<h3 class="rx-paper__title">' + esc(R.title) + '</h3>' +
+          '<p class="rx-paper__sub">' + esc(R.team) + ' · Grounded in ' + R.theories.map(esc).join(', ') + '</p>' +
+        '</div>' +
+      '</article>' +
+      '<div class="rx-stats">' + R.headline.map((h) => '<div class="rx-stat"><b>' + esc(h[0]) + '</b><span>' + esc(h[1]) + '</span></div>').join('') + '</div>' +
+      '<div class="seg-wrap"><div class="seg" role="tablist" aria-label="Research sections">' + RX_TABS.map((t) =>
+        '<button class="seg__btn" role="tab" type="button" id="rxt-' + t[0] + '" data-rx-tab="' + t[0] + '" aria-controls="rx-panel" aria-selected="' + (rxTab === t[0]) + '">' + t[1] + '</button>').join('') + '</div></div>' +
+      '<div class="rx-panel" id="rx-panel" role="tabpanel" aria-labelledby="rxt-' + rxTab + '"></div>' +
+      '<p class="rx-privacy">' + icon('lock') + '<span>' + esc(R.privacy) + '</span></p>';
+    renderRxPanel();
+  }
+
+  function renderRxPanel() {
+    const R = D.research, el = $('#rx-panel');
+    el.setAttribute('aria-labelledby', 'rxt-' + rxTab);
+    $$('[data-rx-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.rxTab === rxTab)));
+    let html = '';
+    if (rxTab === 'findings') {
+      const s = R.consensus[rxScn];
+      html =
+        '<div class="rx-grid">' +
+          '<figure class="rx-chart">' +
+            '<figcaption><b>How often investigators agreed</b><small>Share who reached the same reading of each sketch · 8 investigators · dashed line = majority</small></figcaption>' +
+            '<div class="cbars">' + R.consensus.map((c, i) =>
+              '<button class="cbar" type="button" data-rx-scn="' + i + '" aria-pressed="' + (i === rxScn) + '" data-tip="' + esc(c[0] + ' · ' + c[1] + ': ' + c[2] + '% agreed') + '">' +
+                '<span class="cbar__label"><b>' + esc(c[0]) + '</b>' + esc(c[1]) + '</span>' +
+                '<span class="cbar__track"><span class="cbar__fill" style="--v:' + c[2] + '%;--i:' + i + '"></span></span>' +
+                '<span class="cbar__val">' + c[2] + '%</span>' +
+              '</button>').join('') + '</div>' +
+            '<p class="cbars__axis"><span>0%</span><span>50%</span><span>100%</span></p>' +
+            '<p class="rx-detail" aria-live="polite"><b>' + esc(s[0] + ' · ' + s[1]) + '</b>' + esc(s[3]) + '</p>' +
+          '</figure>' +
+          '<figure class="rx-chart">' +
+            '<figcaption><b>What made sketches hard to read</b><small>Share of responses that cited each barrier</small></figcaption>' +
+            '<p class="rx-legend"><span><i class="sw sw--1"></i>Experienced · 30 responses</span><span><i class="sw sw--2"></i>Novice · 18 responses</span></p>' +
+            '<div class="gbars">' + R.barriers.map((b, i) =>
+              '<div class="gbar"><p>' + esc(b[0]) + '</p>' +
+                '<div class="gbar__row" data-tip="' + esc('Experienced: ' + pctf(b[2])) + '"><span class="gbar__track"><span class="gbar__fill gbar__fill--1" style="--v:' + b[2] + '%;--i:' + i + '"></span></span><span class="gbar__val">' + pctf(b[2]) + '</span></div>' +
+                '<div class="gbar__row" data-tip="' + esc('Novice: ' + pctf(b[1])) + '"><span class="gbar__track"><span class="gbar__fill gbar__fill--2" style="--v:' + b[1] + '%;--i:' + i + '"></span></span><span class="gbar__val">' + pctf(b[1]) + '</span></div>' +
+              '</div>').join('') + '</div>' +
+            '<p class="rx-take">' + icon('info') + '<span>Missing measurements topped both groups. Experienced investigators also flagged unclear trajectories, a stricter standard for evidence.</span></p>' +
+          '</figure>' +
+        '</div>' +
+        '<div class="rx-tablebar"><button class="btn btn--tinted btn--sm" type="button" data-rx-table aria-expanded="' + rxTable + '">' + icon('grid') + (rxTable ? 'Hide table' : 'Show as table') + '</button></div>' +
+        (rxTable ? '<div class="rx-tables">' +
+          '<table><caption>Investigator agreement by scenario</caption><thead><tr><th>Scenario</th><th>Collision</th><th>Agreed</th></tr></thead><tbody>' +
+            R.consensus.map((c) => '<tr><td>' + esc(c[0]) + '</td><td>' + esc(c[1]) + '</td><td>' + c[2] + '%</td></tr>').join('') + '</tbody></table>' +
+          '<table><caption>Barriers cited (% of responses)</caption><thead><tr><th>Barrier</th><th>Experienced</th><th>Novice</th></tr></thead><tbody>' +
+            R.barriers.map((b) => '<tr><td>' + esc(b[0]) + '</td><td>' + pctf(b[2]) + '</td><td>' + pctf(b[1]) + '</td></tr>').join('') + '</tbody></table>' +
+        '</div>' : '');
+    } else if (rxTab === 'questions') {
+      html = '<ol class="rx-qs">' + R.questions.map((q, i) => '<li><span class="flow__n">' + (i + 1) + '</span><span>' + esc(q) + '</span></li>').join('') + '</ol>';
+    } else if (rxTab === 'method') {
+      html = '<div class="rx-method">' + R.method.map((m) =>
+        '<div class="rx-card"><span class="tile__icon" data-tint="blue">' + icon(m[0]) + '</span><b>' + esc(m[1]) + '</b><span>' + esc(m[2]) + '</span></div>').join('') + '</div>' +
+        '<div class="tags rx-theories">' + R.theories.map((t) => '<span class="tag tag--plain">' + esc(t) + '</span>').join('') + '</div>';
+    } else {
+      html =
+        '<p class="rx-kicker">A Pareto analysis found that two causes explain <b>' + esc(R.vitalFew) + '</b> of interpretation problems. The proposed system targets both.</p>' +
+        '<div class="rx-fixes">' + R.fixes.map((f) =>
+          '<div class="rx-card rx-fix"><span class="tile__icon" data-tint="orange">' + icon(f[0]) + '</span><p class="rx-fix__num">' + pctf(f[1]) + '</p><b>' + esc(f[2]) + '</b><span>' + esc(f[3]) + '</span></div>').join('') + '</div>' +
+        '<div class="rx-card rx-solution"><b>' + esc(R.solution.name) + '</b><ul class="xp__points">' + R.solution.points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul></div>' +
+        '<blockquote class="rx-quote">' + esc(R.conclusion) + '</blockquote>';
+    }
+    el.innerHTML = html;
+  }
+
+  /** Small hover/focus tooltip for chart marks ([data-tip]). */
+  function chartTip(target) {
+    const el = $('#tip');
+    el.innerHTML = '<b>' + esc(target.dataset.tip) + '</b>';
+    el.hidden = false;
+    const r = target.getBoundingClientRect(), tr = el.getBoundingClientRect();
+    let y = r.top - tr.height - 8;
+    if (y < 64) y = r.bottom + 8;
+    el.style.left = HOS.clamp(r.left + r.width / 2 - tr.width / 2, 8, innerWidth - tr.width - 8) + 'px';
+    el.style.top = y + 'px';
   }
 
   /* ======================================================================
@@ -400,7 +659,25 @@
       const so = t.closest('[data-skill-open]');
       if (so) { openSkill(so.dataset.skillOpen); return; }
       if (t.closest('[data-skill-reset]')) { $('#skill-q').value = ''; $('#skill-used').checked = false; skillCat = 'all'; renderSkills(); $('#skill-q').focus(); return; }
-      const sk = t.closest('.sk-card [data-skill]');
+      const sv = t.closest('[data-skill-view]');
+      if (sv) { setSkillView(sv.dataset.skillView); return; }
+      const rc = t.closest('[data-radar-cat]');
+      if (rc) { skillCat = rc.dataset.radarCat; renderSkills(); goto('skill-tabs'); return; }
+      const fl = t.closest('[data-flip]');
+      if (fl) { fl.setAttribute('aria-pressed', String(fl.getAttribute('aria-pressed') !== 'true')); return; }
+      const pr = t.closest('[data-preset]');
+      if (pr) { stack.length = 0; PRESETS[+pr.dataset.preset].ids.forEach(addStack); return; }
+      const sd = t.closest('[data-stack-del]');
+      if (sd) { stack.splice(stack.indexOf(sd.dataset.stackDel), 1); renderStack(); $('#skm-q').focus(); return; }
+      if (t.closest('[data-stack-clear]')) { stack.length = 0; renderStack(); $('#skm-q').focus(); return; }
+      const sa = t.closest('[data-stack-add]');
+      if (sa) { addStack(sa.dataset.stackAdd); Sheet.close(); goto('sk-match'); return; }
+      const rt = t.closest('[data-rx-tab]');
+      if (rt) { rxTab = rt.dataset.rxTab; renderRxPanel(); rt.focus(); return; }
+      const rs = t.closest('[data-rx-scn]');
+      if (rs) { rxScn = +rs.dataset.rxScn; renderRxPanel(); $('[data-rx-scn="' + rxScn + '"]').focus(); return; }
+      if (t.closest('[data-rx-table]')) { rxTable = !rxTable; renderRxPanel(); $('[data-rx-table]').focus(); return; }
+      const sk = t.closest('.sk-card [data-skill], .orbit [data-skill]');
       if (sk) { HOS.hideTip(); openSkill(sk.dataset.skill); return; }
       const cp = t.closest('[data-copy]');
       if (cp) { HOS.copy(cp.dataset.copy); return; }
@@ -426,6 +703,25 @@
     document.addEventListener('focusin', (e) => { const s = e.target.closest && e.target.closest('[data-skill]'); if (s && lastPointer !== 'touch') HOS.showTip(s); else if (!s) HOS.hideTip(); });
     window.addEventListener('scroll', HOS.hideTip, { passive: true });
 
+    // Chart tooltips (research charts)
+    document.addEventListener('pointerover', (e) => { const c = e.target.closest('[data-tip]'); if (c && e.pointerType === 'mouse') chartTip(c); });
+    document.addEventListener('pointerout', (e) => { const c = e.target.closest('[data-tip]'); if (c && !c.contains(e.relatedTarget)) HOS.hideTip(); });
+
+    // Radar keys highlight their axis
+    const axis = (id, on) => $$('[data-axis="' + id + '"]').forEach((n) => n.classList.toggle('is-hot', on));
+    ['pointerover', 'focusin'].forEach((ev) => document.addEventListener(ev, (e) => { const k = e.target.closest && e.target.closest('[data-radar-cat]'); if (k) axis(k.dataset.radarCat, true); }));
+    ['pointerout', 'focusout'].forEach((ev) => document.addEventListener(ev, (e) => { const k = e.target.closest && e.target.closest('[data-radar-cat]'); if (k) axis(k.dataset.radarCat, false); }));
+
+    // Stack matcher: add by name
+    $('.skm__add').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const inp = $('#skm-q'), q = inp.value.trim().toLowerCase();
+      if (!q) return;
+      const s = D.skills.find((x) => x.name.toLowerCase() === q) || D.skills.find((x) => x.name.toLowerCase().indexOf(q) > -1);
+      if (s) { addStack(s.id); inp.value = ''; }
+      else HOS.toast('Not in my toolkit yet, but I learn fast', 'sparkles');
+    });
+
     // Nav hairline appears once the page scrolls (like apple.com)
     const nav = $('#nav');
     const onScroll = () => nav.classList.toggle('is-scrolled', scrollY > 8);
@@ -443,7 +739,7 @@
   /* Highlight the current section in the nav and tab bar */
   function scrollSpy() {
     if (!('IntersectionObserver' in window)) return;
-    const ids = ['top', 'overview', 'projects', 'skills', 'experience', 'playground', 'contact'];
+    const ids = ['top', 'overview', 'projects', 'skills', 'research', 'experience', 'playground', 'contact'];
     const io = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
         if (!en.isIntersecting) return;
@@ -460,7 +756,7 @@
 
   /* Fade sections in as they scroll into view; count up the stats once */
   function reveal() {
-    const els = $$('.sec-head, .tile, .why__card, .xp, .edu__card, .term-window, .ccard, .mailform');
+    const els = $$('.sec-head, .tile, .why__card, .sk-me, .sk-match, .rx-paper, .rx-stat, .xp, .edu__card, .term-window, .ccard, .mailform');
     if (HOS.reduced() || !('IntersectionObserver' in window)) { HOS.countUp($('#bento')); return; }
     els.forEach((el) => el.classList.add('reveal'));
     const io = new IntersectionObserver((entries) => {
@@ -490,7 +786,11 @@
     $$('[data-photo]').forEach((img) => { img.src = P.photo; });
     renderOverview();
     renderProjects();
+    renderMe();
+    renderMatch();
+    renderOrbit();
     renderSkills();
+    renderResearch();
     renderExperience();
     renderContact();
     $('#print-cv').innerHTML = HOS.resumeHTML();

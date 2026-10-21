@@ -19,7 +19,7 @@ hannahos/
 ├── assets/
 │   ├── icons/brands/       Official logos (Devicon + Simple Icons), stored locally
 │   ├── projects/           Project images (SVG, lazy-loaded)
-│   ├── img/avatar.svg      Placeholder photo
+│   ├── img/                Portraits (hannah.jpg, hannah-formal.jpg) + placeholder avatar.svg
 │   ├── resume/             Hannah-Lyn-Santiago-Resume.pdf
 │   └── og-image.png, favicon and app icons
 ├── tools/                  Asset generators (not needed to run the site)
@@ -31,7 +31,10 @@ hannahos/
 - **Hero:** name, availability, tagline, and buttons for projects, résumé download and contact
 - **Overview:** an Apple-style bento grid of stats plus three reasons to hire
 - **Projects:** a segmented control (All · Software · Embedded · QA). Tap a card to open an App Store-style detail sheet.
-- **Skills:** app-icon logo tiles with red count badges. Hover shows where each skill was used; tap shows those projects.
+- **Skills:** a profile card (flip photo + radar of hands-on depth), a "Does Hannah fit your stack?" matcher with presets,
+  and two views: a spinning **Orbit** (most-used skills closest to the center) or the logo **Grid**. Tap any skill for details.
+- **Research:** public-safe summary of the approved thesis, with interactive findings charts. Content lives in `research` in `js/data.js`.
+  Investigator identities, case records, sketches, locations and transcripts are deliberately left out. Don't add the PDF.
 - **Experience:** experience entries, plus education and honors
 - **Playground:** an interactive terminal (`help`, `whoami`, `projects`, `skills`, `sudo hire-hannah`…)
 - **Contact:** an iOS contact card with quick actions, plus a mail compose form (opens the email app)
@@ -44,7 +47,7 @@ hannahos/
 ## Before you publish
 
 1. **Links:** in `js/data.js`, fill `links.github` and `links.linkedin`. Empty links show a polite "coming soon" note.
-2. **Photo:** save it as `assets/img/hannah.jpg` (square, ~480×480) and set `photo: 'assets/img/hannah.jpg'` in `js/data.js`.
+2. **Photo:** done: `assets/img/hannah.jpg` (main) and `assets/img/hannah-formal.jpg` (shown when the skills card flips).
 3. **Project links:** fill each project's `demo` and `github`. To use real screenshots, replace `assets/projects/<id>.svg` (16:10).
 4. **Domain:** in `index.html`, uncomment the canonical link and make `og:image` / `twitter:image` full URLs.
 5. **Résumé PDF:** after editing content, open the site in Chrome, press Ctrl/Cmd+P → Save as PDF (A4),

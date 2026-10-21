@@ -58,7 +58,7 @@
     "sameAs": ["https://www.linkedin.com/in/hannahlynsantiago/", "https://www.facebook.com/hannahlynsantiago26"],
     "address": { "@type": "PostalAddress", "addressLocality": "Cebu City", "addressCountry": "PH" },
     "alumniOf": { "@type": "CollegeOrUniversity", "name": "University of San Jose–Recoletos" },
-    "knowsAbout": ["Embedded Systems", "ESP32", "PIC Microcontrollers", "FPGA", "PCB Design", "React", "Next.js", ".NET MAUI", "C#", "TypeScript", "Software Testing"]
+    "knowsAbout": ["Traffic Collision Investigation Research", "Embedded Systems", "ESP32", "PIC Microcontrollers", "FPGA", "PCB Design", "React", "Next.js", ".NET MAUI", "C#", "TypeScript", "Software Testing"]
   }
   </script>
 </head>
@@ -69,12 +69,13 @@
   <header class="nav" id="nav">
     <div class="nav__in container">
       <a class="nav__brand" href="#top" title="Back to top">
-        <span class="nav__logo" aria-hidden="true">H</span><span>Hannah Santiago</span>
+        <span class="nav__logo" aria-hidden="true">H</span><span>Hannah Lyn T. Santiago</span>
       </a>
       <nav class="nav__links" aria-label="Sections">
         <a href="#overview" data-spy="overview">Overview</a>
         <a href="#projects" data-spy="projects">Projects</a>
         <a href="#skills" data-spy="skills">Skills</a>
+        <a href="#research" data-spy="research">Research</a>
         <a href="#experience" data-spy="experience">Experience</a>
         <a href="#contact" data-spy="contact">Contact</a>
       </nav>
@@ -89,7 +90,7 @@
     <!-- ===== Hero ===== -->
     <section class="hero" id="top" aria-labelledby="hero-name">
       <div class="container hero__in">
-        <div class="hero__avatar"><img src="assets/img/avatar.svg" alt="Portrait of Hannah Lyn T. Santiago" width="120" height="120" data-photo></div>
+        <div class="hero__avatar"><img src="assets/img/hannah.jpg" alt="Portrait of Hannah Lyn T. Santiago" width="120" height="120" data-photo></div>
         <p class="status-pill"><span class="pulse-dot"></span>Available for opportunities · Cebu City, PH</p>
         <h1 class="hero__name" id="hero-name">Hannah Lyn T. Santiago</h1>
         <p class="hero__role">Computer Engineering Student · Embedded Systems · Software · QA</p>
@@ -133,9 +134,13 @@
       <div class="container">
         <header class="sec-head">
           <p class="eyebrow">Skills</p>
-          <h2 class="sec-title" id="skills-title">The toolkit.</h2>
-          <p class="sec-lead">Tap any skill to see where I used it and what I paired it with.</p>
+          <h2 class="sec-title" id="skills-title">The toolkit.<br><span class="muted">Explore it your way.</span></h2>
+          <p class="sec-lead">Spin the orbit, search the grid, or check it against your team's stack.</p>
         </header>
+        <div class="sk-lab">
+          <article class="sk-me" id="sk-me" aria-label="Profile"></article>
+          <article class="sk-match" id="sk-match" aria-labelledby="skm-title"></article>
+        </div>
         <div class="sk-bar">
           <div class="sk-search">
             <span data-icon="search"></span>
@@ -146,11 +151,21 @@
             <span class="sk-toggle__track" aria-hidden="true"></span>
             <span>Used in projects</span>
           </label>
+          <div class="seg sk-view" id="skill-view" role="group" aria-label="Skills view">
+            <button class="seg__btn" type="button" data-skill-view="orbit" aria-pressed="true"><span data-icon="sparkles"></span>Orbit</button>
+            <button class="seg__btn" type="button" data-skill-view="grid" aria-pressed="false"><span data-icon="grid"></span>Grid</button>
+          </div>
         </div>
         <div class="seg-wrap"><div class="seg seg--scroll" id="skill-tabs" role="tablist" aria-label="Skill categories"></div></div>
         <p class="sk-count" id="skill-count" aria-live="polite"></p>
-        <div class="sk-bento" id="skill-groups"></div>
+        <div class="orbit-wrap" id="skill-orbit"></div>
+        <div class="sk-bento" id="skill-groups" hidden></div>
       </div>
+    </section>
+
+    <!-- ===== Research (public-safe summary of the approved thesis) ===== -->
+    <section class="section section--ink ink" id="research" aria-labelledby="research-title">
+      <div class="container" id="research-body"></div>
     </section>
 
     <!-- ===== Experience ===== -->

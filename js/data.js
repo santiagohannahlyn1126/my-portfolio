@@ -28,7 +28,8 @@ window.HOS_DATA = {
     timezone: 'Asia/Manila',
     email: 'santiagohannahlyn1126@gmail.com',
     schoolEmail: 'hannahlyn.santiago.22@usjr.edu.ph',
-    photo: 'assets/img/avatar.svg',   // swap for 'assets/img/hannah.jpg'
+    photo: 'assets/img/hannah.jpg',
+    photoAlt: 'assets/img/hannah-formal.jpg',   // second portrait, shown when the skills card flips
     status: 'Available for opportunities',
     about: 'Computer Engineering student at University of San Jose–Recoletos. ' +
       'I work across the full stack, from microcontrollers and PCBs to web, desktop and mobile apps, ' +
@@ -82,6 +83,72 @@ window.HOS_DATA = {
     { title: 'BS Computer Engineering', org: 'University of San Jose–Recoletos · Cebu City', note: 'READS working scholar' },
     { title: 'Senior High School', org: 'With High Honors', note: 'Academic Scholar' }
   ],
+
+  /* ---- Research: approved undergraduate thesis -----------------------------
+     Public-safe summary only. Withheld on purpose: investigator identities and
+     IDs, case records, scene sketches, locations, interview transcripts,
+     consent forms and the full manuscript.
+     ------------------------------------------------------------------------ */
+  research: {
+    title: "Assessing Manual Investigation Challenges Affecting the TEU Investigator's Interpretation of Traffic Collision Scene Diagrams",
+    short: 'Same sketch, different stories',
+    kind: 'Undergraduate thesis · BS Computer Engineering · USJ-R',
+    year: '2026',
+    status: 'Approved',
+    team: '3-member research team',
+    pitch: 'When police investigators read the same hand-drawn crash sketch, do they reach the same conclusion? We measured it and found where manual diagrams break down. Then we specified a digital tool to fix it.',
+    headline: [
+      ['67.6%', 'of interpretation problems trace to two causes: blurry sketches and missing measurements'],
+      ['25–100%', 'investigator agreement, depending on how complete the sketch was'],
+      ['8 × 6', 'investigators × archived collision scenarios, read independently']
+    ],
+    questions: [
+      'How consistently do investigators interpret the same manual sketch?',
+      'What ambiguities and discrepancies do they find?',
+      'What challenges limit the interpretation process?',
+      'How could technology improve consistency, reliability and efficiency?'
+    ],
+    method: [
+      ['layers', 'Design', 'Descriptive-evaluative, mixed methods'],
+      ['user', 'Respondents', '8 active traffic investigators: 3 novice, 5 experienced (purposive, stratified)'],
+      ['file', 'Instrument', '6 archived collision sketches read independently, plus an operational interview'],
+      ['chart', 'Analysis', 'Consensus levels, coded ambiguity frequencies and Pareto analysis']
+    ],
+    theories: ['Human Error Theory', 'Spatial Cognition Theory', 'Technology Acceptance Model'],
+    /* Share of investigators who reached the dominant interpretation (n = 8) */
+    consensus: [
+      ['B.1', 'Car to car', 100, 'Clear rear-end collision. Every investigator agreed.'],
+      ['B.2', 'Car to car', 25, 'Lateral impact with an ambiguous sketch. Readings split into rear-end, counterflow and right-of-way stories.'],
+      ['B.3', 'Motorcycle to car', 100, 'Simple lane encroachment. Every investigator agreed.'],
+      ['B.4', 'Motorcycle to car', 63, 'Overtaking sideswipe. Missing lane detail split the readings.'],
+      ['B.5', 'Motorcycle to motorcycle', 38, 'Unclear lane order and impact points. Who was ahead could not be settled.'],
+      ['B.6', 'Motorcycle to motorcycle', 88, 'Most agreed, but experienced readers flagged missing measurements.']
+    ],
+    /* % of responses citing each barrier (novice n = 18, experienced n = 30) */
+    barriers: [
+      ['Missing or incomplete measurements', 55.56, 60.0],
+      ['Unclear vehicle positioning / trajectory', 16.67, 46.67],
+      ['Ambiguous lane or road markings', 22.22, 36.67],
+      ['Unclear damage indication', 33.33, 30.0]
+    ],
+    vitalFew: '67.6%',   // as reported in the paper (35.3% + 32.4% before rounding)
+    /* The "vital few" from the Pareto analysis → what the proposed system does about each */
+    fixes: [
+      ['image', 35.3, 'Visual clarity / blur', 'Vector-based rendering keeps lines, lanes and damage marks sharp at any zoom, from field tablet to courtroom screen.'],
+      ['sliders', 32.4, 'Missing measurements', 'Dimensioning constraints block submission until key distances such as gaps and skid marks are filled in.']
+    ],
+    solution: {
+      name: 'ATADS · Automated Traffic Accident Diagramming System',
+      points: [
+        'Step-by-step sketch protocol: orientation, roadway, vehicles, evidence, validation',
+        'Controlled vocabularies aligned with RA 4136 replace free-text slang',
+        'Drag-and-drop, to-scale symbols, including local vehicles such as jeepneys',
+        'Planned GIS overlays to anchor diagrams to real coordinates'
+      ]
+    },
+    conclusion: 'Consistency depends on how complete the sketch is, not on seniority. Manual sketches work for simple cases. Complex scenes need digital tools that enforce measurements and standard terms.',
+    privacy: 'Public summary only. Investigator identities, case records, scene sketches, locations and interview transcripts are withheld under the study\'s ethics protocol. The full manuscript is not shared publicly.'
+  },
 
   /* ---- Projects -----------------------------------------------------------
      cat:   'software' | 'embedded'      qa: true adds it to the QA filter
@@ -377,7 +444,8 @@ window.HOS_DATA = {
     // Soft skills
     { id: 'communication', name: 'Client Communication', cat: 'soft', glyph: 'message', note: "Explaining tech fixes to Registrar's Office staff and clients" },
     { id: 'time',          name: 'Time Management',      cat: 'soft', glyph: 'clock',   note: '4+ years of work alongside full-time studies' },
-    { id: 'detail',        name: 'Attention to Detail',  cat: 'soft', glyph: 'zoom',    note: 'Data validation and QA testing', rel: ['xeleqt'] }
+    { id: 'detail',        name: 'Attention to Detail',  cat: 'soft', glyph: 'zoom',    note: 'Data validation and QA testing', rel: ['xeleqt'] },
+    { id: 'research',      name: 'Research & Analysis',  cat: 'soft', glyph: 'chart',   note: 'Approved thesis: mixed-methods study with consensus and Pareto analysis' }
   ],
 
   /* Easter egg: Recycle Bin → bugs_i_fixed.txt */

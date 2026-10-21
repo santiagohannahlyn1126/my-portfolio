@@ -19,6 +19,7 @@
     skills: 'Languages, frameworks and tools',
     projects: 'All 9 projects',
     experience: 'Work history',
+    research: 'My approved undergraduate thesis',
     contact: 'How to reach me',
     resume: 'Open and download my résumé',
     'sudo hire-hannah': 'Try it ;)',
@@ -33,7 +34,7 @@
   };
   /* "open <name>": scroll to a section or open a sheet */
   const go = (id) => () => HOS.goto(id);
-  const APPS = { overview: go('overview'), about: go('overview'), projects: go('projects'), skills: go('skills'), experience: go('experience'), contact: go('contact'), resume: () => HOS.openResume(), bugs: () => HOS.openBugs() };
+  const APPS = { overview: go('overview'), about: go('overview'), projects: go('projects'), skills: go('skills'), experience: go('experience'), research: go('research'), contact: go('contact'), resume: () => HOS.openResume(), bugs: () => HOS.openBugs() };
   const CHIPS = ['help', 'whoami', 'projects', 'skills', 'contact', 'sudo hire-hannah'];
 
   class Terminal {
@@ -224,6 +225,15 @@
             ].concat(j.points.map((p) => '        › ' + esc(p))).concat(['']), 18);
           }
           break;
+        case 'research': {
+          const R = D.research;
+          await this.printLines([
+            '<span class="t-ok">[' + esc(R.status.toUpperCase()) + ']</span> <span class="t-b">' + esc(R.title) + '</span>',
+            '        <span class="t-mut">' + esc(R.kind) + ' · ' + esc(R.year) + '</span>'
+          ].concat(R.headline.map((h) => '        › <span class="t-acc">' + esc(h[0]) + '</span> ' + esc(h[1])))
+            .concat(['', '<span class="t-mut">Tip: open research  → interactive findings</span>']), 18);
+          break;
+        }
         case 'contact':
           await this.printLines([
             '<span class="t-b">Let\'s talk.</span>',
