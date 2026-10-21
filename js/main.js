@@ -352,49 +352,75 @@
       HOS.logo(s, { size: 16 }) + esc(s.name) + '</button>';
   }
 
-  /** App Store-style screenshot carousel (scroll-snap, arrow buttons, keyboard friendly). */
-  function gallery(p) {
-    return '<div class="shots" aria-label="Screenshots">' +
-      '<div class="shots__track" tabindex="0" aria-label="Screenshot carousel, scroll sideways">' +
-        p.shots.map((s, i) => '<figure class="shots__item">' +
-          '<img src="assets/projects/' + p.id + '/' + s[0] + '.webp" alt="' + esc(s[1]) + '" loading="' + (i < 2 ? 'eager' : 'lazy') + '" decoding="async">' +
-          '<figcaption>' + esc(s[1]) + '</figcaption></figure>').join('') +
+  /* Project sheet: screenshots on the left, the story on the right */
+  let pv = { p: null, i: 0 };
+
+  function viewer(p) {
+    if (!p.shots) return '<figure class="pv pv--single"><img class="pv__img" src="' + thumb(p) + '" alt="' + esc(p.title) + ' illustration"></figure>';
+    return '<figure class="pv">' +
+        '<div class="pv__frame">' +
+          '<img class="pv__img" id="pv-img" src="assets/projects/' + p.id + '/' + p.shots[0][0] + '.webp" alt="' + esc(p.shots[0][1]) + '" decoding="async">' +
+          '<button class="pv__nav pv__nav--prev" type="button" data-pv-step="-1" aria-label="Previous screenshot">' + icon('back') + '</button>' +
+          '<button class="pv__nav pv__nav--next" type="button" data-pv-step="1" aria-label="Next screenshot">' + icon('next') + '</button>' +
+          '<span class="pv__count" id="pv-count">1 / ' + p.shots.length + '</span>' +
+        '</div>' +
+        '<figcaption class="pv__cap" id="pv-cap" aria-live="polite">' + esc(p.shots[0][1]) + '</figcaption>' +
+      '</figure>' +
+      '<div class="pv__thumbs" role="group" aria-label="Screenshots" style="--n:' + p.shots.length + '">' + p.shots.map((s, i) =>
+        '<button class="pv__thumb" type="button" data-pv="' + i + '" aria-pressed="' + (i === 0) + '" aria-label="' + esc(s[1]) + '">' +
+          '<img src="assets/projects/' + p.id + '/' + s[0] + '.webp" alt="" loading="lazy" decoding="async"></button>').join('') +
       '</div>' +
-      '<button class="shots__nav shots__nav--prev" type="button" data-shots="-1" aria-label="Previous screenshot">' + icon('back') + '</button>' +
-      '<button class="shots__nav shots__nav--next" type="button" data-shots="1" aria-label="Next screenshot">' + icon('next') + '</button>' +
-    '</div>';
+      '<p class="ps__note">' + icon(/blur/i.test(p.shotsNote || 'blur') ? 'lock' : 'image') + esc(p.shotsNote || 'Screenshots are from the live system. Part numbers, suppliers, prices, partner names and emails are blurred to protect company data.') + '</p>';
+  }
+
+  function pvShow(i) {
+    const p = pv.p;
+    if (!p || !p.shots) return;
+    pv.i = (i + p.shots.length) % p.shots.length;
+    const s = p.shots[pv.i], img = $('#pv-img');
+    if (!img) return;
+    img.src = 'assets/projects/' + p.id + '/' + s[0] + '.webp';
+    img.alt = s[1];
+    $('#pv-cap').textContent = s[1];
+    $('#pv-count').textContent = (pv.i + 1) + ' / ' + p.shots.length;
+    $$('[data-pv]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.pv === pv.i)));
+    const th = $('[data-pv="' + pv.i + '"]');
+    if (th) th.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (img.animate) img.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
   }
 
   function openProject(id) {
     const p = HOS.projectById(id);
     const next = D.projects[(D.projects.indexOf(p) + 1) % D.projects.length];
+    pv = { p, i: 0 };
     const action = (url, label, ic, primary) => url
       ? '<a class="btn ' + (primary ? 'btn--primary' : 'btn--tinted') + ' btn--sm" href="' + esc(url) + '" target="_blank" rel="noopener">' + icon(ic) + label + '</a>'
       : '<button class="btn ' + (primary ? 'btn--primary' : 'btn--tinted') + ' btn--sm" type="button" data-soon="' + label + '">' + icon(ic) + label + '</button>';
     Sheet.open(CAT[p.cat].label + ' project',
-      '<article class="ps">' +
-        '<header class="ps__head">' +
-          '<img class="ps__icon" src="' + thumb(p) + '" alt="" width="96" height="96">' +
-          '<div class="ps__id">' +
-            '<p class="ps__cat" data-cat="' + p.cat + '">' + catLine(p) + '</p>' +
-            '<h3 class="ps__title">' + esc(p.title) + '</h3>' +
-            '<div class="ps__actions">' + action(p.demo, 'Live demo', 'play', true) + action(p.github, 'GitHub', 'github', false) + '</div>' +
-          '</div>' +
-        '</header>' +
-        '<p class="ps__pitch">' + esc(p.pitch) + '</p>' +
-        (p.client ? '<p class="ps__client">' + icon('briefcase') + esc(p.client) + '</p>' : '') +
-        (p.shots ? gallery(p) : '<img class="ps__shot" src="' + thumb(p) + '" alt="' + esc(p.title) + ' illustration" width="800" height="500">') +
-        '<h4 class="ps__h">Highlights</h4>' +
-        '<ul class="list">' + p.points.map((x) => '<li class="list__row">' + icon('checkCircle') + '<span>' + esc(x) + '</span></li>').join('') + '</ul>' +
-        (p.flow ? '<h4 class="ps__h">How it works</h4><ol class="flow">' + p.flow.map((f, i) =>
-          '<li class="flow__step"><span class="flow__n">' + (i + 1) + '</span><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></li>').join('') + '</ol>' : '') +
-        (p.features ? '<h4 class="ps__h">Key features</h4><ul class="feats">' + p.features.map((f) =>
-          '<li>' + icon(f[0]) + '<span>' + esc(f[1]) + '</span></li>').join('') + '</ul>' : '') +
-        '<h4 class="ps__h">Built with</h4>' +
-        '<div class="tags">' + p.tech.map(techButton).join('') + p.tags.map(HOS.plainTag).join('') + '</div>' +
-        (p.shots ? '<p class="ps__note">' + icon(/blur/i.test(p.shotsNote || 'blur') ? 'lock' : 'image') + esc(p.shotsNote || 'Screenshots are from the live system. Part numbers, suppliers, prices, partner names and emails are blurred to protect company data.') + '</p>' : '') +
-        '<button class="list list__next" type="button" data-project="' + next.id + '"><span><small>Next project</small>' + esc(next.title) + '</span>' + icon('next') + '</button>' +
-      '</article>', { wide: !!p.shots });
+      '<article class="ps ps--split">' +
+        '<div class="ps__media">' + viewer(p) + '</div>' +
+        '<div class="ps__info">' +
+          '<header class="ps__head">' +
+            '<img class="ps__icon" src="' + thumb(p) + '" alt="" width="72" height="72">' +
+            '<div class="ps__id">' +
+              '<p class="ps__cat" data-cat="' + p.cat + '">' + catLine(p) + '</p>' +
+              '<h3 class="ps__title">' + esc(p.title) + '</h3>' +
+              '<div class="ps__actions">' + action(p.demo, 'Live demo', 'play', true) + action(p.github, 'GitHub', 'github', false) + '</div>' +
+            '</div>' +
+          '</header>' +
+          '<p class="ps__pitch">' + esc(p.pitch) + '</p>' +
+          (p.client ? '<p class="ps__client">' + icon('briefcase') + esc(p.client) + '</p>' : '') +
+          '<h4 class="ps__h">Highlights</h4>' +
+          '<ul class="list">' + p.points.map((x) => '<li class="list__row">' + icon('checkCircle') + '<span>' + esc(x) + '</span></li>').join('') + '</ul>' +
+          (p.flow ? '<h4 class="ps__h">How it works</h4><ol class="flow">' + p.flow.map((f, i) =>
+            '<li class="flow__step"><span class="flow__n">' + (i + 1) + '</span><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></li>').join('') + '</ol>' : '') +
+          (p.features ? '<h4 class="ps__h">Key features</h4><ul class="feats">' + p.features.map((f) =>
+            '<li>' + icon(f[0]) + '<span>' + esc(f[1]) + '</span></li>').join('') + '</ul>' : '') +
+          '<h4 class="ps__h">Built with</h4>' +
+          '<div class="tags">' + p.tech.map(techButton).join('') + p.tags.map(HOS.plainTag).join('') + '</div>' +
+          '<button class="list list__next" type="button" data-project="' + next.id + '"><span><small>Next project</small>' + esc(next.title) + '</span>' + icon('next') + '</button>' +
+        '</div>' +
+      '</article>', { split: true });
   }
 
   /* ======================================================================
@@ -628,9 +654,9 @@
   }
 
   function renderSkills() {
-    const cats = [{ id: 'all', name: 'All' }].concat(D.skillCategories);
-    $('#skill-tabs').innerHTML = cats.map((c) =>
-      '<button class="seg__btn" role="tab" type="button" data-skill-cat="' + c.id + '" aria-selected="' + (skillCat === c.id) + '">' + esc(c.name) + '</button>').join('');
+    const TAB = { lang: 'Languages', web: 'Web', db: 'Databases', hw: 'Hardware & IoT', plat: 'Platforms', tools: 'Tools', qa: 'QA', soft: 'Soft skills' };
+    $('#skill-tabs').innerHTML = D.skillCategories.map((c) =>
+      '<button class="seg__btn" type="button" data-skill-cat="' + c.id + '" aria-pressed="' + (skillCat === c.id) + '" title="' + esc(c.name) + (skillCat === c.id ? ' · tap again to show all' : '') + '">' + esc(TAB[c.id] || c.name) + '</button>').join('');
 
     const tile = (s, i) => {
       const n = usedIn(s.id);
@@ -656,8 +682,6 @@
     }).join('') + '<div class="empty sk-empty" hidden>' + icon('search') + '<b>No skills match</b><span>Try another word, or clear the filters.</span>' +
       '<button class="btn btn--tinted btn--sm" type="button" data-skill-reset>Clear filters</button></div>';
     HOS.fillIcons($('#skill-groups'));
-    const tabs = $('#skill-tabs'), sel = $('[aria-selected="true"]', tabs);
-    if (sel) tabs.scrollLeft = Math.max(0, sel.offsetLeft - (tabs.clientWidth - sel.offsetWidth) / 2);
     setSkillView(skillView);
   }
 
@@ -1213,6 +1237,10 @@
       if (ps) { Pager.step(+ps.dataset.pageStep); return; }
       const pc = t.closest('[data-proj-scroll]');
       if (pc) { Car.step(+pc.dataset.projScroll); return; }
+      const pvb = t.closest('[data-pv]');
+      if (pvb) { pvShow(+pvb.dataset.pv); return; }
+      const pvs = t.closest('[data-pv-step]');
+      if (pvs) { pvShow(pv.i + +pvs.dataset.pvStep); return; }
       const cd = t.closest('[data-car]');
       if (cd) { Car.go(+cd.dataset.car); return; }
       const cc = t.closest('#proj-grid .pcard');
@@ -1229,9 +1257,7 @@
       if (f) { pstate.cat = f.dataset.filter; renderProjects(); $('[data-filter="' + pstate.cat + '"]').focus(); return; }
       if (t.closest('[data-clear-tech]')) { pstate.tech = null; renderProjects(); $('[data-filter="all"]').focus(); return; }
       const sc = t.closest('[data-skill-cat]');
-      if (sc) { skillCat = sc.dataset.skillCat; renderSkills(); $('[data-skill-cat="' + skillCat + '"]').focus(); return; }
-      const sn = t.closest('[data-shots]');
-      if (sn) { const tr = sn.parentElement.querySelector('.shots__track'); tr.scrollBy({ left: +sn.dataset.shots * tr.clientWidth * 0.9, behavior: HOS.reduced() ? 'auto' : 'smooth' }); return; }
+      if (sc) { const id = sc.dataset.skillCat; skillCat = skillCat === id ? 'all' : id; renderSkills(); $('#skill-tabs [data-skill-cat="' + id + '"]').focus(); return; }
       const so = t.closest('[data-skill-open]');
       if (so) { openSkill(so.dataset.skillOpen); return; }
       if (t.closest('[data-skill-reset]')) { $('#skill-q').value = ''; $('#skill-used').checked = false; skillCat = 'all'; renderSkills(); $('#skill-q').focus(); return; }
@@ -1268,6 +1294,13 @@
       const g = t.closest('[data-goto]');
       if (g) { Sheet.close(); goto(g.dataset.goto); return; }
       if (!t.closest('[data-skill]')) HOS.hideTip();
+    });
+
+    // Project sheet: ← / → flip through screenshots
+    document.addEventListener('keydown', (e) => {
+      if (!Sheet.isOpen() || !pv.p || !pv.p.shots || !$('#pv-img')) return;
+      if (e.target.closest && e.target.closest('input, textarea')) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); pvShow(pv.i + (e.key === 'ArrowRight' ? 1 : -1)); }
     });
 
     // Segmented controls: arrow keys move between options (WAI-ARIA tabs)

@@ -134,7 +134,7 @@
       const sheet = $('#sheet'), panel = $('.sheet__panel', sheet), body = $('#sheet-body');
       if (sheet.hidden) this.lastFocus = document.activeElement;
       $('#sheet-title').textContent = title;
-      panel.className = 'sheet__panel' + (opts.wide ? ' sheet__panel--wide' : '');
+      panel.className = 'sheet__panel' + (opts.split ? ' sheet__panel--split' : opts.wide ? ' sheet__panel--wide' : '');
       body.innerHTML = html;
       fillIcons(body);
       body.scrollTop = 0;
