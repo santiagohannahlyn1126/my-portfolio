@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hannah Lyn Santiago | Computer Engineer Portfolio</title>
+  <meta name="description" content="Hannah Lyn T. Santiago, Computer Engineering student in Cebu City. Builds embedded systems, web, desktop and mobile apps, and tests them before users do. Projects, skills, experience and résumé.">
+  <meta name="author" content="Hannah Lyn T. Santiago">
+  <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hannah">
+  <!-- Set your domain, then uncomment: <link rel="canonical" href="https://your-domain.com/"> -->
+
+  <!-- Open Graph / social previews (use absolute URLs once your domain is live) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hannah Lyn Santiago | Computer Engineer Portfolio">
+  <meta property="og:description" content="Embedded systems, software and QA. I build it, wire it, and break it before users do.">
+  <meta property="og:image" content="assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Portfolio of Hannah Lyn T. Santiago, Computer Engineering student">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hannah Lyn Santiago | Computer Engineer Portfolio">
+  <meta name="twitter:description" content="Embedded systems, software and QA. I build it, wire it, and break it before users do.">
+  <meta name="twitter:image" content="assets/og-image.png">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <!-- Apple devices render San Francisco (the system font). Everyone else gets Inter,
+       its closest match. JetBrains Mono is for the terminal. Loaded without blocking render. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
+
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Theme follows the visitor's device (like iOS) unless they picked one. Runs before paint. -->
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('hos-theme'); } catch (e) {}
+      document.documentElement.dataset.theme = t || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    })();
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Hannah Lyn T. Santiago",
+    "jobTitle": "Computer Engineering Student",
+    "email": "mailto:santiagohannahlyn1126@gmail.com",
+    "sameAs": ["https://www.linkedin.com/in/hannahlynsantiago/", "https://www.facebook.com/hannahlynsantiago26"],
+    "address": { "@type": "PostalAddress", "addressLocality": "Cebu City", "addressCountry": "PH" },
+    "alumniOf": { "@type": "CollegeOrUniversity", "name": "University of San Jose–Recoletos" },
+    "knowsAbout": ["Embedded Systems", "ESP32", "PIC Microcontrollers", "FPGA", "PCB Design", "React", "Next.js", ".NET MAUI", "C#", "TypeScript", "Software Testing"]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ===== Top navigation (frosted glass, like apple.com) ===== -->
+  <header class="nav" id="nav">
+    <div class="nav__in container">
+      <a class="nav__brand" href="#top" title="Back to top">
+        <span class="nav__logo" aria-hidden="true">H</span><span>Hannah Santiago</span>
+      </a>
+      <nav class="nav__links" aria-label="Sections">
+        <a href="#overview" data-spy="overview">Overview</a>
+        <a href="#projects" data-spy="projects">Projects</a>
+        <a href="#skills" data-spy="skills">Skills</a>
+        <a href="#experience" data-spy="experience">Experience</a>
+        <a href="#contact" data-spy="contact">Contact</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="icon-btn" type="button" data-action="theme" aria-label="Switch theme"><span class="theme-ico"></span></button>
+        <button class="btn btn--primary btn--sm" type="button" data-action="resume">Résumé</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ===== Hero ===== -->
+    <section class="hero" id="top" aria-labelledby="hero-name">
+      <div class="container hero__in">
+        <div class="hero__avatar"><img src="assets/img/avatar.svg" alt="Portrait of Hannah Lyn T. Santiago" width="120" height="120" data-photo></div>
+        <p class="status-pill"><span class="pulse-dot"></span>Available for opportunities · Cebu City, PH</p>
+        <h1 class="hero__name" id="hero-name">Hannah Lyn T. Santiago</h1>
+        <p class="hero__role">Computer Engineering Student · Embedded Systems · Software · QA</p>
+        <p class="hero__tagline">I build it, wire it, and <span class="grad-text">break it</span> before users do.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg" href="#projects">View projects</a>
+          <a class="btn btn--tinted btn--lg" href="assets/resume/Hannah-Lyn-Santiago-Resume.pdf" download><span data-icon="download"></span>Download résumé</a>
+          <a class="btn btn--plain btn--lg" href="#contact">Contact me <span data-icon="next"></span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== At a glance (bento) ===== -->
+    <section class="section" id="overview" aria-labelledby="overview-title">
+      <div class="container">
+        <header class="sec-head">
+          <p class="eyebrow">Overview</p>
+          <h2 class="sec-title" id="overview-title">Hardware to software.<br><span class="muted">Tested before it ships.</span></h2>
+          <p class="sec-lead" id="about-text"></p>
+        </header>
+        <div class="bento" id="bento"></div>
+        <div class="why" id="why"></div>
+      </div>
+    </section>
+
+    <!-- ===== Projects ===== -->
+    <section class="section section--alt" id="projects" aria-labelledby="projects-title">
+      <div class="container">
+        <header class="sec-head">
+          <p class="eyebrow">Projects</p>
+          <h2 class="sec-title" id="projects-title">Nine builds. Real results.</h2>
+          <p class="sec-lead">From inventory platforms to color-sorting robots. Tap any project for the details.</p>
+        </header>
+        <div class="proj-filters" id="proj-filters"></div>
+        <div class="proj-grid" id="proj-grid"></div>
+      </div>
+    </section>
+
+    <!-- ===== Skills ===== -->
+    <section class="section" id="skills" aria-labelledby="skills-title">
+      <div class="container">
+        <header class="sec-head">
+          <p class="eyebrow">Skills</p>
+          <h2 class="sec-title" id="skills-title">The toolkit.</h2>
+          <p class="sec-lead">Tap any skill to see where I used it and what I paired it with.</p>
+        </header>
+        <div class="sk-bar">
+          <div class="sk-search">
+            <span data-icon="search"></span>
+            <input id="skill-q" type="search" placeholder="Search skills, e.g. ESP32, React, testing" aria-label="Search skills" autocomplete="off">
+          </div>
+          <label class="sk-toggle">
+            <input type="checkbox" id="skill-used" role="switch">
+            <span class="sk-toggle__track" aria-hidden="true"></span>
+            <span>Used in projects</span>
+          </label>
+        </div>
+        <div class="seg-wrap"><div class="seg seg--scroll" id="skill-tabs" role="tablist" aria-label="Skill categories"></div></div>
+        <p class="sk-count" id="skill-count" aria-live="polite"></p>
+        <div class="sk-bento" id="skill-groups"></div>
+      </div>
+    </section>
+
+    <!-- ===== Experience ===== -->
+    <section class="section section--alt" id="experience" aria-labelledby="experience-title">
+      <div class="container">
+        <header class="sec-head">
+          <p class="eyebrow">Experience</p>
+          <h2 class="sec-title" id="experience-title">Four years of showing up.</h2>
+          <p class="sec-lead">Working student since 2022, alongside full-time engineering studies.</p>
+        </header>
+        <div class="exp" id="exp"></div>
+        <h3 class="sub-title">Education & honors</h3>
+        <div class="edu" id="edu"></div>
+      </div>
+    </section>
+
+    <!-- ===== Terminal playground ===== -->
+    <section class="section" id="playground" aria-labelledby="play-title">
+      <div class="container">
+        <header class="sec-head">
+          <p class="eyebrow">Playground</p>
+          <h2 class="sec-title" id="play-title">Prefer the command line?</h2>
+          <p class="sec-lead">Type <code>help</code>, or try <code>sudo hire-hannah</code>.</p>
+        </header>
+        <div class="term-window">
+          <div class="term-window__bar" aria-hidden="true"><span></span><span></span><span></span><b>hannah — zsh</b></div>
+          <div class="term-window__body" id="terminal"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Contact ===== -->
+    <section class="section section--alt" id="contact" aria-labelledby="contact-title">
+      <div class="container">
+        <header class="sec-head">
+          <p class="eyebrow">Contact</p>
+          <h2 class="sec-title" id="contact-title">Let's build something.</h2>
+          <p class="sec-lead">Open to opportunities in embedded systems, software and QA. Email is the fastest way to reach me.</p>
+        </header>
+        <div class="contact" id="contact-body"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__in">
+      <p>© 2026 Hannah Lyn T. Santiago · Cebu City, Philippines</p>
+      <div class="footer__links">
+        <a href="https://www.linkedin.com/in/hannahlynsantiago/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.facebook.com/hannahlynsantiago26" target="_blank" rel="noopener">Facebook</a>
+        <button type="button" data-action="bugs">bugs_i_fixed.txt</button>
+        <a href="assets/resume/Hannah-Lyn-Santiago-Resume.pdf" download>Résumé PDF</a>
+        <a href="#top">Back to top</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== iPhone-style tab bar (phones) ===== -->
+  <nav class="tabbar" aria-label="Quick navigation">
+    <a href="#top" data-spy="top"><span data-icon="user"></span>Home</a>
+    <a href="#projects" data-spy="projects"><span data-icon="folder"></span>Projects</a>
+    <a href="#skills" data-spy="skills"><span data-icon="cpu"></span>Skills</a>
+    <a href="#experience" data-spy="experience"><span data-icon="briefcase"></span>Experience</a>
+    <a href="#contact" data-spy="contact"><span data-icon="mail"></span>Contact</a>
+  </nav>
+
+  <!-- iOS sheet (project details, résumé, notes) -->
+  <div class="sheet" id="sheet" hidden>
+    <div class="sheet__backdrop" data-action="close-sheet"></div>
+    <div class="sheet__panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">
+      <div class="sheet__grab" aria-hidden="true"></div>
+      <header class="sheet__head">
+        <h2 class="sheet__title" id="sheet-title"></h2>
+        <button class="sheet__close" type="button" data-action="close-sheet" aria-label="Close"><span data-icon="close"></span></button>
+      </header>
+      <div class="sheet__body" id="sheet-body"></div>
+    </div>
+  </div>
+
+  <!-- Print-only résumé (Ctrl/Cmd + P gives a clean 1-page PDF) -->
+  <div class="print-cv" id="print-cv" aria-hidden="true"></div>
+
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+  <div class="tip" id="tip" role="tooltip" hidden></div>
+
+  <script src="js/data.js" defer></script>
+  <script src="js/icons.js" defer></script>
+  <script src="js/core.js" defer></script>
+  <script src="js/resume.js" defer></script>
+  <script src="js/terminal.js" defer></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>

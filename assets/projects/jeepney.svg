@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12302d"/><stop offset="1" stop-color="#081017"/></linearGradient>
+  <radialGradient id="glow" cx="0.78" cy="0.12" r="0.75"><stop offset="0" stop-color="#4cf0e0" stop-opacity="0.38"/><stop offset="1" stop-color="#4cf0e0" stop-opacity="0"/></radialGradient>
+  <radialGradient id="glow2" cx="0.05" cy="1" r="0.7"><stop offset="0" stop-color="#7596f0" stop-opacity="0.22"/><stop offset="1" stop-color="#7596f0" stop-opacity="0"/></radialGradient>
+  <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4cf0e0"/><stop offset="1" stop-color="#7596f0" stop-opacity="0.5"/></linearGradient>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.045"/></pattern>
+  <filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.5"/></filter>
+</defs>
+<rect width="800" height="500" fill="url(#bg)"/>
+<rect width="800" height="500" fill="url(#grid)"/>
+<rect width="800" height="500" fill="url(#glow)"/>
+<rect width="800" height="500" fill="url(#glow2)"/>
+<g filter="url(#sh)"><rect x="300" y="34" width="200" height="432" rx="34" fill="#0b111d" stroke="rgba(255,255,255,0.12)" stroke-width="2"/></g>
+  <rect x="372" y="46" width="56" height="14" rx="7" fill="#05080f"/><rect x="312" y="74" width="176" height="250" rx="18" fill="#101a2b"/><path d="M312 104 H488" stroke="#18243a" stroke-width="6"/><path d="M312 142 H488" stroke="#18243a" stroke-width="6"/><path d="M312 180 H488" stroke="#18243a" stroke-width="6"/><path d="M312 218 H488" stroke="#18243a" stroke-width="6"/><path d="M312 256 H488" stroke="#18243a" stroke-width="6"/><path d="M312 294 H488" stroke="#18243a" stroke-width="6"/><path d="M340 74 V324" stroke="#18243a" stroke-width="6"/><path d="M382 74 V324" stroke="#18243a" stroke-width="6"/><path d="M424 74 V324" stroke="#18243a" stroke-width="6"/><path d="M466 74 V324" stroke="#18243a" stroke-width="6"/><path d="M330 304 L370 256 L370 194 L430 154 L470 104" fill="none" stroke="#4cf0e0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="330" cy="304" r="9" fill="#0b111d" stroke="#4cf0e0" stroke-width="4"/><circle cx="370" cy="256" r="6" fill="#0b111d" stroke="#4cf0e0" stroke-width="4"/><circle cx="370" cy="194" r="6" fill="#0b111d" stroke="#4cf0e0" stroke-width="4"/><circle cx="430" cy="154" r="6" fill="#0b111d" stroke="#4cf0e0" stroke-width="4"/><circle cx="470" cy="104" r="9" fill="#0b111d" stroke="#7596f0" stroke-width="4"/><rect x="312" y="338" width="176" height="110" rx="16" fill="#131d2e" stroke="rgba(255,255,255,0.12)"/>
+      <rect x="328" y="356" width="90" height="10" rx="5" fill="#2f3d58"/><rect x="328" y="376" width="60" height="8" rx="4" fill="#222e44"/>
+      <text x="328" y="426" font-family="Inter,Segoe UI,sans-serif" font-size="26" font-weight="800" fill="#4cf0e0">₱13</text>
+      <rect x="412" y="404" width="62" height="28" rx="14" fill="#4cf0e0"/><g filter="url(#sh)"><rect x="530" y="150" width="170" height="96" rx="16" fill="#131d2e" stroke="rgba(255,255,255,0.12)"/></g>
+      <circle cx="560" cy="182" r="12" fill="#4cf0e0" opacity=".9"/><rect x="582" y="174" width="90" height="9" rx="4" fill="#2f3d58"/><rect x="582" y="190" width="60" height="7" rx="3.5" fill="#222e44"/>
+      <rect x="548" y="214" width="134" height="8" rx="4" fill="#1d2840"/><rect x="548" y="214" width="84" height="8" rx="4" fill="#7596f0"/>
+</svg>

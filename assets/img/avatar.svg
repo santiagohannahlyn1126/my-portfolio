@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+  <linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#123b4a"/><stop offset="1" stop-color="#241a4d"/></linearGradient>
+  <linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#48f0e1"/><stop offset="1" stop-color="#b3a6ff"/></linearGradient>
+  <radialGradient id="g" cx="0.3" cy="0.2" r="0.8"><stop offset="0" stop-color="#2ee6d6" stop-opacity="0.35"/><stop offset="1" stop-color="#2ee6d6" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="240" height="240" fill="url(#a)"/><rect width="240" height="240" fill="url(#g)"/>
+<path d="M0 180 H60 L80 160 H140 M240 60 H190 L170 80 H120 M30 0 V40 L50 60" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="3"/>
+<text x="120" y="146" text-anchor="middle" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="92" font-weight="800" letter-spacing="-4" fill="url(#t)">HS</text>
+</svg>
