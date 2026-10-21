@@ -2006,7 +2006,7 @@ html.paged .play .term-window__body { height: auto; min-height: 0; }
 .edge-hint.is-on { opacity: 1; transform: translate(-50%, 0); }
 
 /* 11l. Skills profile card: wider and readable */
-.sk-layout { grid-template-columns: minmax(330px, 400px) minmax(0, 1fr); }
+@media (min-width: 1024px) { .sk-layout { grid-template-columns: minmax(330px, 400px) minmax(0, 1fr); } }
 .sk-layout .sk-me { padding: 22px; }
 .sk-layout .flip { width: 72px; height: 72px; }
 .sk-layout .sk-me__id h3 { font-size: 19px; }
