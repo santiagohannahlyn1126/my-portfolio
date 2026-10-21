@@ -1079,7 +1079,7 @@
       research: [R.status + ' undergraduate thesis · ' + R.year + '.', [
         row('data-goto="research"', 'file', R.short, 'Read the abstract'),
         row('data-goto="research"', 'lock', 'Public-safe summary', 'No case records or identities')]],
-      education: [S.degree + ', ' + S.short + '.', [
+      education: ['BS Computer Engineering at ' + S.short.replace('-', '‑') + ', ' + S.years + '.', [
         row('data-goto="education"', 'cap', S.name, S.years + ' · ' + S.city),
         row('data-goto="journey-title"', 'map', 'My journey', S.journey.length + ' milestones')]],
       experience: ['Working scholar since 2022, alongside full-time studies.', D.experience.map((j, i) =>

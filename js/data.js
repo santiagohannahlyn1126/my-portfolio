@@ -21,7 +21,7 @@ window.HOS_DATA = {
     name: 'Hannah Lyn T. Santiago',
     shortName: 'Hannah',
     initials: 'HS',
-    title: 'Computer Engineer · Embedded Systems · Software · QA',
+    title: 'Computer Engineer · Embedded Systems · Software · QA · Full Stack Developer',
     role: 'Computer Engineer',
     tagline: 'I build it, wire it, and break it before users do.',
     location: 'Cebu City, Philippines',
