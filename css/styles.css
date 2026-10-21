@@ -1297,7 +1297,6 @@ input::placeholder, textarea::placeholder { color: var(--text-3); }
 }
 
 /* 11b. SCREENS: one section per screen (html.paged is set by the pager) ----- */
-.proj-nav { display: none; }
 html.paged, html.paged body { height: 100%; overflow: hidden; }
 html.paged body { padding-bottom: 0; }
 html.paged .nav { border-bottom-color: var(--sep); }
@@ -1348,15 +1347,9 @@ html.paged .hero__cta { margin-top: clamp(16px, 3vh, 30px); }
 .proj-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .proj-bar .proj-filters { margin-bottom: 0; }
 html.paged .proj-bar .proj-filters { justify-content: flex-start; }
-html.paged .proj-nav { display: flex; gap: 8px; }
 html.paged .proj-nav .icon-btn { width: 40px; height: 40px; }
-html.paged .proj-grid {
-  display: flex; gap: 18px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
-  padding: 4px 4px 14px; margin: 0 -4px; scrollbar-width: thin;
-}
-html.paged .pcard { flex: 0 0 clamp(260px, 31%, 350px); scroll-snap-align: start; }
+
 html.paged .pcard__img { aspect-ratio: 16 / 9; }
-html.paged .proj-grid > .empty { flex: 1; }
 
 /* Skills: profile column | tools + stage */
 .sk-layout { display: grid; grid-template-columns: minmax(270px, 330px) minmax(0, 1fr); gap: 20px; align-items: start; }
@@ -1503,9 +1496,7 @@ html.paged .mailform textarea { min-height: 110px; }
   .home-stats .ov-stat { padding: 14px; }
   .ov { grid-template-columns: minmax(0, 1fr); }
   .ov .why__front { padding: 16px; }
-  html.paged .pcard { flex-basis: 82%; }
   .proj-bar { gap: 10px; }
-  html.paged .proj-nav { display: none; }
   .sk-main .sk-view { margin-left: 0; }
   
   
@@ -1727,6 +1718,43 @@ html.paged .mailform textarea { min-height: 72px; height: 88px; }
 .peek__open .ico { width: 15px; height: 15px; stroke-width: 2.4; }
 .peek__open:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
 :root[data-theme='dark'] .peek { background: rgba(36, 36, 38, 0.92); }
+
+/* 11g. Projects carousel --------------------------------------------------- */
+.proj-nav { display: flex; align-items: center; gap: 8px; }
+.proj-nav .icon-btn { width: 40px; height: 40px; }
+.proj-nav .icon-btn:disabled { opacity: 0.35; cursor: default; }
+.proj-count { min-width: 48px; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.proj-grid.pc-stage { position: relative; display: block; min-height: 300px; margin: 6px 0 0; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.pc-stage .pcard {
+  position: absolute; top: 0; left: 50%; width: clamp(280px, 38%, 420px); animation: none;
+  transform-origin: center center; will-change: transform, opacity;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease, box-shadow 0.3s;
+}
+.pc-stage .pcard:not(.is-active) { cursor: pointer; box-shadow: var(--shadow); }
+.pc-stage .pcard:not(.is-active) .pcard__more { visibility: hidden; }
+.pc-stage .pcard.is-active { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--sep); }
+.pc-stage .pcard:hover { transform-origin: center; }
+.pc-stage .pcard.is-active:hover .pcard__img img { transform: scale(1.04); }
+.pc-stage .pcard img { -webkit-user-drag: none; }
+.pc-stage.is-empty { height: auto !important; }
+.pc-stage.is-empty .empty { position: static; }
+.proj-dots { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
+.proj-dot { width: 8px; height: 8px; padding: 0; border-radius: 4px; background: var(--fill-2); transition: width 0.35s var(--spring), background-color 0.2s; }
+.proj-dot:hover { background: var(--text-3); }
+.proj-dot[aria-current] { width: 26px; background: var(--grad); }
+.proj-dot { position: relative; }
+.proj-dot::after { content: ''; position: absolute; inset: -8px -3px; }
+/* The OS "reduce motion" switch kills transitions site-wide; keep a short slide here so the carousel still reads as moving */
+@media (prefers-reduced-motion: reduce) {
+  .pc-stage .pcard { transition-duration: 0.45s, 0.3s, 0.3s !important; }
+}
+@media (max-width: 767px) {
+  .pc-stage .pcard { width: 80%; }
+  .proj-bar { flex-wrap: nowrap; }
+  .proj-bar .proj-filters { min-width: 0; overflow-x: auto; }
+  .proj-count { display: none; }
+  .proj-nav .icon-btn { width: 36px; height: 36px; }
+}
 
 /* 12. MOTION -------------------------------------------------------------- */
 .reveal { transform: translateY(32px); transition: transform 0.9s var(--ease); }

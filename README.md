@@ -37,7 +37,9 @@ Without JavaScript the page falls back to a normal scrolling layout.
 - **Hero:** name, availability, tagline, and buttons for projects, résumé download and contact
 - **Overview:** intro card with a typing "Right now I'm…" line (edit `profile.doing`), four clickable stat tiles,
   a scrolling logo strip, and "why hire me" cards that flip to show proof
-- **Projects:** a segmented control (All · Software · Embedded · QA). Tap a card to open an App Store-style detail sheet.
+- **Projects:** a carousel. The active card sits in the center with neighbours fanned out; it auto-advances every 5 s
+  (pauses on hover), loops, and works with arrows, dots, swipe/drag and the arrow keys. Filters: All · Software · Embedded · QA.
+  Tap the center card for its App Store-style detail sheet.
 - **Skills:** a profile card (flip photo + radar of hands-on depth), a "Does Hannah fit your stack?" matcher with presets,
   and two views: an **Orbit** you can drag to spin or toss logos around (most-used skills closest to the center) or the logo **Grid**. Tap any skill for details.
 - **Research:** public-safe summary of the approved thesis, with interactive findings charts. Content lives in `research` in `js/data.js`.

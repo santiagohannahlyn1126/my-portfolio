@@ -208,9 +208,9 @@
       '<div class="seg" role="tablist" aria-label="Filter projects">' + FILTERS.map((x) =>
         '<button class="seg__btn" role="tab" type="button" data-filter="' + x.id + '" aria-selected="' + (pstate.cat === x.id) + '">' + x.label + '</button>').join('') + '</div>' + chip;
 
-    $('#proj-grid').scrollLeft = 0;
+    Car.i = 0;
     $('#proj-grid').innerHTML = list.length ? list.map((p, i) =>
-      '<button class="pcard" type="button" data-project="' + p.id + '" style="--i:' + i + '">' +
+      '<button class="pcard" type="button" data-project="' + p.id + '" data-idx="' + i + '" data-title="' + esc(p.title) + '">' +
         '<span class="pcard__img' + (p.cover ? ' pcard__img--shot' : '') + '"><img src="' + esc(p.cover || thumb(p)) + '" alt="" width="800" height="500" loading="lazy" decoding="async"' + (p.cover && p.id !== 'xeleqt' ? ' style="object-position:center"' : '') + '></span>' +
         '<span class="pcard__body">' +
           '<span class="pcard__eyebrow" data-cat="' + p.cat + '">' + catLine(p) + '</span>' +
@@ -221,7 +221,121 @@
       '</button>').join('')
       : '<div class="empty">' + icon('folder') + '<b>No public project lists ' + esc(HOS.skillById(pstate.tech).name) + ' yet</b><span>' +
         esc(HOS.skillById(pstate.tech).note || 'Used in coursework and lab work.') + '</span><button class="btn btn--tinted btn--sm" type="button" data-clear-tech>Show all projects</button></div>';
+    $('#proj-grid').classList.toggle('is-empty', !list.length);
+    Car.init();
   }
+
+  /* Projects carousel: the active card sits in the center, neighbours fan out
+     on both sides. Auto-advances, pauses on hover/focus, loops, and responds to
+     arrows, dots, swipe/drag, trackpad swipes and ← / →. */
+  const Car = {
+    i: 0, n: 0, cards: [], timer: 0, hover: false, dragged: false, DELAY: 5000, wheelAt: 0, bound: false,
+
+    init() {
+      const stage = $('#proj-grid');
+      this.cards = $$('.pcard', stage);
+      this.n = this.cards.length;
+      this.i = Math.min(this.i, Math.max(0, this.n - 1));
+      $('#proj-dots').innerHTML = this.n > 1 ? this.cards.map((c, k) =>
+        '<button class="proj-dot" type="button" data-car="' + k + '" aria-label="Show ' + esc(c.dataset.title) + '"></button>').join('') : '';
+      $$('.proj-nav button').forEach((b) => { b.disabled = this.n < 2; });
+      if (!this.bound) this.bind();
+      this.measure();
+      this.layout();
+      this.play();
+    },
+
+    /** Stage height = tallest card, so nothing jumps while sliding. */
+    measure() {
+      const stage = $('#proj-grid');
+      stage.style.height = this.n ? Math.max.apply(null, this.cards.map((c) => c.offsetHeight)) + 'px' : '';
+    },
+
+    offset(k) {
+      let d = k - this.i;
+      if (this.n > 2) { if (d > this.n / 2) d -= this.n; if (d < -this.n / 2) d += this.n; }
+      return d;
+    },
+
+    layout() {
+      const narrow = innerWidth < 768;
+      this.cards.forEach((c, k) => {
+        const d = this.offset(k), a = Math.abs(d), side = Math.sign(d);
+        const shift = a === 0 ? 0 : (narrow ? 92 : 64) + (a - 1) * (narrow ? 80 : 50);
+        const scale = a === 0 ? 1 : a === 1 ? 0.84 : 0.7;
+        c.style.transform = 'translateX(calc(-50% + ' + (side * shift) + '%)) perspective(1200px) rotateY(' + (-side * Math.min(a, 2) * 9) + 'deg) scale(' + scale + ')';
+        c.style.opacity = a > 2 ? 0 : a === 2 ? 0.35 : a === 1 ? 0.78 : 1;
+        c.style.zIndex = String(10 - a);
+        c.style.pointerEvents = a > 2 ? 'none' : '';
+        c.classList.toggle('is-active', d === 0);
+        c.tabIndex = d === 0 ? 0 : -1;
+        c.setAttribute('aria-hidden', String(d !== 0));
+      });
+      $$('.proj-dot').forEach((b) => { if (+b.dataset.car === this.i) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+      const cur = this.cards[this.i];
+      $('#proj-count').textContent = this.n ? (this.i + 1) + ' / ' + this.n : '';
+      $('#proj-live').textContent = cur ? 'Project ' + (this.i + 1) + ' of ' + this.n + ': ' + cur.dataset.title : '';
+    },
+
+    go(k) {
+      if (!this.n) return;
+      this.i = ((k % this.n) + this.n) % this.n;
+      this.layout();
+      this.play();
+    },
+    step(d) { this.go(this.i + d); },
+
+    /** Auto-advance only while the Projects screen is showing and nobody is interacting. */
+    play() {
+      clearTimeout(this.timer);
+      if (this.n < 2) return;
+      this.timer = setTimeout(() => {
+        const onScreen = !Pager.on || Pager.pages[Pager.i].id === 'projects';
+        if (onScreen && !this.hover && !Sheet.isOpen() && !document.hidden) this.step(1);
+        else this.play();
+      }, this.DELAY);
+    },
+
+    bind() {
+      this.bound = true;
+      const stage = $('#proj-grid');
+      stage.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') this.hover = true; });
+      stage.addEventListener('pointerleave', () => { this.hover = false; this.play(); });
+      stage.addEventListener('focusin', () => { this.hover = true; });
+      stage.addEventListener('focusout', () => { this.hover = false; this.play(); });
+      stage.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          this.step(e.key === 'ArrowRight' ? 1 : -1);
+          this.cards[this.i].focus({ preventScroll: true });
+        }
+      });
+      // Drag / swipe
+      let x0 = null;
+      stage.addEventListener('pointerdown', (e) => { if (e.button === 0) { x0 = e.clientX; this.dragged = false; } });
+      stage.addEventListener('pointermove', (e) => { if (x0 !== null && Math.abs(e.clientX - x0) > 10) this.dragged = true; });
+      const end = (e) => {
+        if (x0 === null) return;
+        const dx = e.clientX - x0;
+        x0 = null;
+        if (Math.abs(dx) > 45) this.step(dx < 0 ? 1 : -1);
+        setTimeout(() => { this.dragged = false; }, 0);
+      };
+      stage.addEventListener('pointerup', end);
+      stage.addEventListener('pointercancel', () => { x0 = null; });
+      // Two-finger horizontal swipe on a trackpad
+      stage.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaX) < Math.abs(e.deltaY) || Math.abs(e.deltaX) < 25) return;
+        const now = performance.now();
+        if (now - this.wheelAt < 550) return;
+        this.wheelAt = now;
+        this.step(e.deltaX > 0 ? 1 : -1);
+      }, { passive: true });
+      stage.addEventListener('dragstart', (e) => e.preventDefault());
+      window.addEventListener('resize', () => { this.measure(); this.layout(); });
+    }
+  };
+
 
   function filterTech(id) {
     pstate.tech = id;
@@ -1010,6 +1124,7 @@
 
     onShow(id) {
       if (id === 'top' && !this.counted) { this.counted = true; HOS.countUp($('#home-stats')); }
+      if (id === 'projects') { Car.measure(); Car.play(); }
     },
 
     /** Can this element (or a scroller between it and the screen) still scroll in direction dir? */
@@ -1097,7 +1212,11 @@
       const ps = t.closest('[data-page-step]');
       if (ps) { Pager.step(+ps.dataset.pageStep); return; }
       const pc = t.closest('[data-proj-scroll]');
-      if (pc) { const g = $('#proj-grid'); g.scrollBy({ left: +pc.dataset.projScroll * g.clientWidth * 0.8, behavior: 'smooth' }); return; }
+      if (pc) { Car.step(+pc.dataset.projScroll); return; }
+      const cd = t.closest('[data-car]');
+      if (cd) { Car.go(+cd.dataset.car); return; }
+      const cc = t.closest('#proj-grid .pcard');
+      if (cc && (Car.dragged || +cc.dataset.idx !== Car.i)) { if (!Car.dragged) Car.go(+cc.dataset.idx); return; }
       const xp = t.closest('[data-xp]');
       if (xp) { xpSel = +xp.dataset.xp; renderXp(); return; }
       const a = t.closest('[data-action]');

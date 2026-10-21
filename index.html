@@ -135,11 +135,14 @@
         <div class="proj-bar">
           <div class="proj-filters" id="proj-filters"></div>
           <div class="proj-nav">
-            <button class="icon-btn" type="button" data-proj-scroll="-1" aria-label="Previous projects"><span data-icon="back"></span></button>
-            <button class="icon-btn" type="button" data-proj-scroll="1" aria-label="More projects"><span data-icon="next"></span></button>
+            <button class="icon-btn" type="button" data-proj-scroll="-1" aria-label="Previous project"><span data-icon="back"></span></button>
+            <span class="proj-count" id="proj-count"></span>
+            <button class="icon-btn" type="button" data-proj-scroll="1" aria-label="Next project"><span data-icon="next"></span></button>
           </div>
         </div>
-        <div class="proj-grid" id="proj-grid"></div>
+        <div class="proj-grid pc-stage" id="proj-grid" role="group" aria-roledescription="carousel" aria-label="Projects"></div>
+        <div class="proj-dots" id="proj-dots" aria-label="Choose a project"></div>
+        <p class="sr-only" id="proj-live" aria-live="polite"></p>
       </div>
     </section>
 
