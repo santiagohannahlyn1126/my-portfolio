@@ -33,7 +33,7 @@ window.HOS_DATA = {
     status: 'Available for opportunities',
     // Rotating "Right now I'm…" line in Overview
     doing: ['wiring up an ESP32', 'shipping React + PHP apps', 'writing test cases', 'designing PCBs', 'building .NET MAUI apps', 'breaking things before users do'],
-    about: 'Computer Engineer trained at University of San Jose–Recoletos. ' +
+    about: 'Computer Engineer studied at University of San Jose–Recoletos. ' +
       'I work across the full stack, from microcontrollers and PCBs to web, desktop and mobile apps, ' +
       'with a QA mindset that catches issues early.'
   },
