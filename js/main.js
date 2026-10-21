@@ -556,16 +556,11 @@
       '<p class="skm__label">Quick stacks</p>' +
       '<div class="skm__presets">' + PRESETS.map((p, i) =>
         '<button class="skm__preset" type="button" data-preset="' + i + '">' + icon(p.icon) + esc(p.name) + '</button>').join('') + '</div>' +
-      '<p class="skm__label">Or add your own</p>' +
-      '<form class="skm__add" autocomplete="off">' +
-        '<label class="sr-only" for="skm-q">Add a skill to your stack</label>' +
-        '<input id="skm-q" list="skm-list" placeholder="Add a tool, e.g. Python">' +
-        '<button class="btn btn--primary btn--sm" type="submit">' + icon('check') + 'Add</button>' +
-        '<datalist id="skm-list">' + D.skills.map((s) => '<option value="' + esc(s.name) + '"></option>').join('') + '</datalist>' +
-      '</form>' +
+      '<p class="skm__label">Your stack <span>· add more with the box above</span></p>' +
       '<div class="skm__tray" id="skm-tray"></div>' +
       '</div>' +
       '<div class="skm__result" id="skm-result" aria-live="polite"></div></div>';
+    $('#skm-list').innerHTML = D.skills.map((s) => '<option value="' + esc(s.name) + '"></option>').join('');
     renderStack();
   }
 

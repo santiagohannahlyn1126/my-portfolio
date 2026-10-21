@@ -2028,6 +2028,18 @@ html.paged .play .term-window__body { height: auto; min-height: 0; }
   .sk-layout .radar__key { min-height: 28px; font-size: 12.5px; }
 }
 
+/* Stack check: "add a tool" box lives in the toolbar, in place of the search bar */
+.sk-bar .skm__add { display: none; }
+.sk-main[data-view='match'] .sk-bar .skm__add { display: flex; align-items: center; }
+.sk-bar .skm__add input { flex: 1; min-width: 0; min-height: 48px; padding: 0 92px 0 46px; border-radius: 14px; background: var(--fill); font-size: 16px; }
+.sk-bar .skm__add .btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); --h: 36px; }
+.sk-bar .skm__add .btn .ico { width: 15px; height: 15px; }
+.sk-bar .skm__add input::-webkit-calendar-picker-indicator { display: none !important; opacity: 0; }
+.skm__label span { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.sk-match .skm__tray { margin-top: 0; }
+.sk-match .skm__tray:empty { display: block; min-height: 30px; }
+.sk-match .skm__tray:empty::before { content: 'Nothing added yet.'; font-size: 13px; color: var(--text-3); }
+
 /* 12. MOTION -------------------------------------------------------------- */
 .reveal { transform: translateY(32px); transition: transform 0.9s var(--ease); }
 .reveal.is-in { transform: none; }
