@@ -53,7 +53,7 @@ window.HOS_DATA = {
     {
       role: 'READS Scholar · Frontline Tech Support',
       org: "Registrar's Office · University of San Jose–Recoletos",
-      period: '2022 – Present',
+      period: '2022 – 2026',
       status: 'ACTIVE',
       points: [
         'Resolved hardware and software issues for a high-volume office',
