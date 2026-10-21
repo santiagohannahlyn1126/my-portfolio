@@ -21,8 +21,8 @@ window.HOS_DATA = {
     name: 'Hannah Lyn T. Santiago',
     shortName: 'Hannah',
     initials: 'HS',
-    title: 'Computer Engineering Student · Embedded Systems · Software · QA',
-    role: 'Computer Engineering Student',
+    title: 'Computer Engineer · Embedded Systems · Software · QA',
+    role: 'Computer Engineer',
     tagline: 'I build it, wire it, and break it before users do.',
     location: 'Cebu City, Philippines',
     timezone: 'Asia/Manila',
@@ -31,13 +31,13 @@ window.HOS_DATA = {
     photo: 'assets/img/hannah.jpg',
     photoAlt: 'assets/img/hannah-formal.jpg',   // second portrait, shown when the skills card flips
     status: 'Available for opportunities',
-    about: 'Computer Engineering student at University of San Jose–Recoletos. ' +
+    about: 'Computer Engineer trained at University of San Jose–Recoletos. ' +
       'I work across the full stack, from microcontrollers and PCBs to web, desktop and mobile apps, ' +
       'with a QA mindset that catches issues early.'
   },
 
   stats: [
-    { value: 4,  suffix: '+', label: 'Years working-student', sub: 'READS Scholar · 2022–Present' },
+    { value: 4,  suffix: '+', label: 'Years as working scholar', sub: 'READS Working Scholar · 2022–2026' },
     { value: 9,  suffix: '',  label: 'Projects built',        sub: 'Hardware and software' },
     { value: 15, suffix: '+', label: 'Languages & tools',     sub: 'Firmware to front-end' },
     { text: 'High Honors',    label: 'Senior High',           sub: 'Academic Scholar' }
@@ -52,15 +52,24 @@ window.HOS_DATA = {
 
   experience: [
     {
-      role: 'READS Scholar · Frontline Tech Support',
-      org: "Registrar's Office · University of San Jose–Recoletos",
+      role: 'READS Working Scholar',
+      org: 'Office of the Registrar · University of San Jose–Recoletos',
       period: '2022 – 2026',
       status: 'ACTIVE',
+      badge: 'Final term · 2026',
       points: [
-        'Resolved hardware and software issues for a high-volume office',
-        'Managed digital records and validated data accuracy',
-        'Translated technical issues into clear fixes for staff and clients',
-        'Delivered 4+ years of work alongside full-time engineering studies'
+        'Ran the front desk, welcoming and serving students, alumni and walk-in clients',
+        'Assessed requests for transcripts, certifications and other school documents, checking requirements before processing',
+        'Gave clear information on registrar procedures, requirements and release schedules',
+        'Troubleshot office computers, printers and software to keep the front desk running',
+        'Managed and validated digital records, and supported other Office of the Registrar tasks',
+        'Served 4 years, 2022 to 2026, alongside full-time engineering studies'
+      ],
+      // Shorter version for the 1-page résumé PDF
+      cv: [
+        'Front desk: served students, alumni and walk-in clients, and explained registrar procedures and requirements',
+        'Assessed requests for transcripts, certifications and other school documents before processing',
+        'Troubleshot office computers, printers and software; managed and validated digital records'
       ]
     },
     {
@@ -79,8 +88,35 @@ window.HOS_DATA = {
     }
   ],
 
+  /* ---- Education feature: school card + journey timeline ---- */
+  school: {
+    name: 'University of San Jose–Recoletos',
+    short: 'USJ-R',
+    city: 'Cebu City, Philippines',
+    degree: 'Bachelor of Science in Computer Engineering',
+    dept: 'School of Engineering · Computer Engineering Department',
+    years: '2022 – 2026',
+    motto: ['Caritas', 'Scientia'],
+    logo: 'assets/img/usjr/usjr-logo.webp',
+    photo: 'assets/img/usjr/usjr-campus.webp',
+    highlights: [
+      ['file', 'Approved', 'Undergraduate thesis', 'research'],
+      ['briefcase', '4 yrs', 'READS Working Scholar', 'experience'],
+      ['message', 'PIO', 'Computer Engineering Society', 'experience'],
+      ['folder', '9', 'Projects built', 'projects']
+    ],
+    focus: ['Embedded Systems', 'Microcontrollers', 'Digital Logic & FPGA', 'PCB Design', 'Software Development', 'Software Testing', 'Research Methods'],
+    journey: [
+      ['Before', 'award', 'Senior High, With High Honors', 'Graduated as an Academic Scholar, then chose Computer Engineering.'],
+      ['2022', 'cap', 'Started BS Computer Engineering', 'Enrolled at USJ-R and joined the READS Working Scholar program at the Office of the Registrar.'],
+      ['2024', 'message', 'Public Information Officer', 'Ran public communications for the Computer Engineering Society (2024 – 2025).'],
+      ['2026', 'file', 'Thesis approved', 'A study of how traffic investigators read hand-drawn collision sketches, with a digital fix.'],
+      ['2026', 'checkCircle', 'Final term as Working Scholar', 'Completed four years at the Office of the Registrar alongside full-time studies.']
+    ]
+  },
+
   education: [
-    { title: 'BS Computer Engineering', org: 'University of San Jose–Recoletos · Cebu City', note: 'READS working scholar' },
+    { title: 'BS Computer Engineering', org: 'University of San Jose–Recoletos · Cebu City', note: 'READS Working Scholar · 2022 – 2026' },
     { title: 'Senior High School', org: 'With High Honors', note: 'Academic Scholar' }
   ],
 

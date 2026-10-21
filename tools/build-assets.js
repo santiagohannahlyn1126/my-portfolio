@@ -216,7 +216,7 @@ h1{margin-top:26px;font-size:64px;font-weight:800;letter-spacing:-.04em;line-hei
 <h1>${P.name}</h1>
 <p class="role">Computer Engineering · Embedded Systems · Software · QA</p>
 <p class="tag">I build it, wire it, and <em>break it</em> before users do.</p>
-<div class="foot"><span>9 projects</span><span>4+ yrs working student</span><span>Cebu City, PH</span></div>
+<div class="foot"><span>9 projects</span><span>4 yrs working scholar</span><span>Cebu City, PH</span></div>
 </div>
 <div class="win"><div class="bar"><b style="background:#ff6b7d"></b><b style="background:#fbbf24"></b><b style="background:#3ddc97"></b>&nbsp;Terminal</div>
 <div class="body"><div><span class="p">hannah@hannahos</span><span class="v">:~$</span> sudo hire-hannah</div>

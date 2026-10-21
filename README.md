@@ -35,7 +35,9 @@ hannahos/
   and two views: a spinning **Orbit** (most-used skills closest to the center) or the logo **Grid**. Tap any skill for details.
 - **Research:** public-safe summary of the approved thesis, with interactive findings charts. Content lives in `research` in `js/data.js`.
   Investigator identities, case records, sketches, locations and transcripts are deliberately left out. Don't add the PDF.
-- **Experience:** experience entries, plus education and honors
+- **Education:** USJ-R campus card (seal, campus photo, motto, 3D tilt) plus a clickable journey timeline. Edit it in `school` in `js/data.js`.
+  The logo and photo are in `assets/img/usjr/`.
+- **Experience:** the READS Working Scholar role (Office of the Registrar), CpE Society and immersion work. `cv` holds the short résumé bullets.
 - **Playground:** an interactive terminal (`help`, `whoami`, `projects`, `skills`, `sudo hire-hannah`…)
 - **Contact:** an iOS contact card with quick actions, plus a mail compose form (opens the email app)
 - **Résumé:** the nav button opens a preview sheet. The PDF downloads in one tap, and Ctrl/Cmd+P prints a clean single page.

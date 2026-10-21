@@ -39,7 +39,7 @@
       '<article class="cv__job">' +
         '<div class="cv__job-top"><h4>' + esc(j.role) + '</h4>' + (j.period ? '<span class="cv__job-period">' + esc(j.period) + '</span>' : '') + '</div>' +
         '<p class="cv__job-org">' + esc(j.org) + '</p>' +
-        '<ul>' + j.points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>' +
+        '<ul>' + (j.cv || j.points).map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>' +
       '</article>').join('');
 
     const projGroup = (cat, label, icon) =>

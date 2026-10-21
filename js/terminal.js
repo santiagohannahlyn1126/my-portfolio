@@ -34,7 +34,7 @@
   };
   /* "open <name>": scroll to a section or open a sheet */
   const go = (id) => () => HOS.goto(id);
-  const APPS = { overview: go('overview'), about: go('overview'), projects: go('projects'), skills: go('skills'), experience: go('experience'), research: go('research'), contact: go('contact'), resume: () => HOS.openResume(), bugs: () => HOS.openBugs() };
+  const APPS = { overview: go('overview'), about: go('overview'), projects: go('projects'), skills: go('skills'), experience: go('experience'), research: go('research'), education: go('education'), contact: go('contact'), resume: () => HOS.openResume(), bugs: () => HOS.openBugs() };
   const CHIPS = ['help', 'whoami', 'projects', 'skills', 'contact', 'sudo hire-hannah'];
 
   class Terminal {
@@ -329,7 +329,7 @@
         ['OS', 'HannahOS 2026.10 (Computer Engineering)'],
         ['Host', 'University of San Jose–Recoletos'],
         ['Location', 'Cebu City, PH (UTC+8)'],
-        ['Uptime', '4+ years as a working student'],
+        ['Uptime', '4 years as a READS Working Scholar'],
         ['Focus', 'Embedded · Software · QA'],
         ['Projects', D.projects.length + ' built (' + sw + ' software, ' + (D.projects.length - sw) + ' embedded)'],
         ['Stack', 'C · C# · TypeScript · React · .NET MAUI · ESP32 · VHDL'],
@@ -356,7 +356,7 @@
         ['Embedded systems (ESP32, PIC, FPGA)', 'PASS'],
         ['Software (web, desktop, mobile)', 'PASS'],
         ['QA mindset', 'PASS'],
-        ['Reliability (4+ yrs working student)', 'PASS'],
+        ['Reliability (4 yrs working scholar)', 'PASS'],
         ['Communication', 'PASS']
       ];
       for (const c of checks) {

@@ -36,7 +36,7 @@
     const sw = D.projects.filter((p) => p.cat === 'software').length;
     $('#bento').innerHTML =
       '<article class="tile tile--hero">' +
-        '<p class="tile__eyebrow">Working student</p>' +
+        '<p class="tile__eyebrow">Working scholar</p>' +
         '<p class="tile__num grad-text" data-count="' + yrs.value + '" data-suffix="' + yrs.suffix + '">' + yrs.value + yrs.suffix + '</p>' +
         '<p class="tile__label">years supporting a high-volume office while studying engineering full-time.</p>' +
         '<p class="tile__sub">' + esc(yrs.sub) + ' · Registrar\'s Office, USJ-R</p>' +
@@ -513,7 +513,82 @@
   }
 
   /* ======================================================================
-     EXPERIENCE & EDUCATION
+     EDUCATION: USJ-R campus card + journey timeline
+     ====================================================================== */
+  let eduStep = D.school.journey.length - 1;
+
+  function renderEducation() {
+    const S = D.school;
+    const hs = D.education[1];
+    $('#education-body').innerHTML =
+      '<header class="sec-head">' +
+        '<p class="eyebrow">Education</p>' +
+        '<h2 class="sec-title" id="education-title">Engineered at ' + esc(S.short) + '.<br><span class="muted">' + S.motto.map(esc).join(' et ') + '.</span></h2>' +
+        '<p class="sec-lead">' + esc(S.degree) + ', ' + esc(S.name) + '.</p>' +
+      '</header>' +
+      '<article class="campus" data-tilt>' +
+        '<img class="campus__bg" src="' + esc(S.photo) + '" alt="" width="790" height="720" loading="lazy" decoding="async">' +
+        '<span class="campus__mark" aria-hidden="true">' + esc(S.short) + '</span>' +
+        '<div class="campus__in">' +
+          '<div class="campus__crest"><span class="campus__halo"></span><img src="' + esc(S.logo) + '" alt="' + esc(S.name) + ' seal" width="408" height="430"></div>' +
+          '<div class="campus__id">' +
+            '<p class="campus__years">' + icon('cap') + esc(S.years) + '</p>' +
+            '<h3 class="campus__degree">' + esc(S.degree) + '</h3>' +
+            '<p class="campus__school">' + esc(S.name) + '</p>' +
+            '<p class="campus__meta">' + esc(S.dept) + '</p>' +
+            '<p class="campus__meta">' + icon('pin') + esc(S.city) + '</p>' +
+            '<div class="campus__motto">' + S.motto.map((m) => '<span>' + esc(m) + '</span>').join('') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="campus__stats">' + S.highlights.map((h) =>
+          '<button class="campus__stat" type="button" data-goto="' + h[3] + '">' + icon(h[0]) + '<b>' + esc(h[1]) + '</b><span>' + esc(h[2]) + '</span></button>').join('') + '</div>' +
+      '</article>' +
+      '<div class="edu-grid">' +
+        '<section class="journey" aria-labelledby="journey-title">' +
+          '<h3 class="journey__title" id="journey-title">' + icon('map') + 'My journey</h3>' +
+          '<div class="journey__track" role="group" aria-label="Education timeline">' + S.journey.map((j, i) =>
+            '<button class="jstep" type="button" data-edu-step="' + i + '" aria-pressed="' + (i === eduStep) + '" style="--i:' + i + '">' +
+              '<span class="jstep__dot">' + icon(j[1]) + '</span><span class="jstep__year">' + esc(j[0]) + '</span><span class="jstep__name">' + esc(j[2]) + '</span>' +
+            '</button>').join('') +
+            '<span class="journey__fill" aria-hidden="true"></span>' +
+          '</div>' +
+          '<div class="journey__card" aria-live="polite"></div>' +
+        '</section>' +
+        '<aside class="edu-side">' +
+          '<div class="edu-tile"><h3>' + icon('chip') + 'What I trained in</h3><div class="edu-focus">' + S.focus.map((f) => '<span>' + esc(f) + '</span>').join('') + '</div></div>' +
+          '<div class="edu-tile edu-tile--honor"><span class="tile__icon" data-tint="orange">' + icon('award') + '</span><div><h3>' + esc(hs.title) + '</h3><p>' + esc(hs.org) + ' · ' + esc(hs.note) + '</p></div></div>' +
+        '</aside>' +
+      '</div>';
+    setEduStep(eduStep);
+  }
+
+  function setEduStep(i) {
+    eduStep = i;
+    const j = D.school.journey[i], n = D.school.journey.length;
+    $$('[data-edu-step]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.eduStep === i)));
+    $('.journey').style.setProperty('--p', n > 1 ? i / (n - 1) : 1);
+    $('.journey__card').innerHTML = '<span class="tile__icon" data-tint="green">' + icon(j[1]) + '</span><div><small>' + esc(j[0]) + '</small><b>' + esc(j[2]) + '</b><p>' + esc(j[3]) + '</p></div>';
+  }
+
+  /** Gentle 3D tilt + photo parallax on the campus card (mouse only, respects reduced motion). */
+  function tiltCampus() {
+    const card = $('[data-tilt]');
+    if (!card || HOS.reduced()) return;
+    card.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.setProperty('--rx', (-y * 5).toFixed(2) + 'deg');
+      card.style.setProperty('--ry', (x * 7).toFixed(2) + 'deg');
+      card.style.setProperty('--mx', (x * 100 + 50).toFixed(1) + '%');
+      card.style.setProperty('--my', (y * 100 + 50).toFixed(1) + '%');
+      card.style.setProperty('--tx', (x * -18).toFixed(1) + 'px');
+      card.style.setProperty('--ty', (y * -12).toFixed(1) + 'px');
+    });
+    card.addEventListener('pointerleave', () => { ['--rx', '--ry', '--mx', '--my', '--tx', '--ty'].forEach((v) => card.style.removeProperty(v)); });
+  }
+
+  /* ======================================================================
+     EXPERIENCE
      ====================================================================== */
   function renderExperience() {
     const tints = ['blue', 'purple', 'green'], ics = ['briefcase', 'message', 'cap'];
@@ -522,14 +597,11 @@
         '<span class="tile__icon" data-tint="' + tints[i % 3] + '">' + icon(ics[i % 3]) + '</span>' +
         '<div class="xp__main">' +
           '<div class="xp__top"><h3>' + esc(j.role) + '</h3>' +
-            (j.status === 'ACTIVE' ? '<span class="badge-now">Current</span>' : '') + '</div>' +
+            (j.status === 'ACTIVE' ? '<span class="badge-now">' + esc(j.badge || 'Current') + '</span>' : '') + '</div>' +
           '<p class="xp__org">' + esc(j.org) + (j.period ? ' · <span class="xp__period">' + esc(j.period) + '</span>' : '') + '</p>' +
           '<ul class="xp__points">' + j.points.map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>' +
         '</div>' +
       '</article>').join('');
-    $('#edu').innerHTML = D.education.map((e, i) =>
-      '<article class="edu__card"><span class="tile__icon" data-tint="' + (i ? 'orange' : 'blue') + '">' + icon(i ? 'award' : 'cap') + '</span>' +
-        '<div><h4>' + esc(e.title) + '</h4><p>' + esc(e.org) + '</p><small>' + esc(e.note) + '</small></div></article>').join('');
   }
 
   /* ======================================================================
@@ -672,6 +744,8 @@
       if (t.closest('[data-stack-clear]')) { stack.length = 0; renderStack(); $('#skm-q').focus(); return; }
       const sa = t.closest('[data-stack-add]');
       if (sa) { addStack(sa.dataset.stackAdd); Sheet.close(); goto('sk-match'); return; }
+      const es = t.closest('[data-edu-step]');
+      if (es) { setEduStep(+es.dataset.eduStep); return; }
       const rt = t.closest('[data-rx-tab]');
       if (rt) { rxTab = rt.dataset.rxTab; renderRxPanel(); rt.focus(); return; }
       const rs = t.closest('[data-rx-scn]');
@@ -739,7 +813,7 @@
   /* Highlight the current section in the nav and tab bar */
   function scrollSpy() {
     if (!('IntersectionObserver' in window)) return;
-    const ids = ['top', 'overview', 'projects', 'skills', 'research', 'experience', 'playground', 'contact'];
+    const ids = ['top', 'overview', 'projects', 'skills', 'research', 'education', 'experience', 'playground', 'contact'];
     const io = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
         if (!en.isIntersecting) return;
@@ -756,7 +830,7 @@
 
   /* Fade sections in as they scroll into view; count up the stats once */
   function reveal() {
-    const els = $$('.sec-head, .tile, .why__card, .sk-me, .sk-match, .rx-paper, .rx-stat, .xp, .edu__card, .term-window, .ccard, .mailform');
+    const els = $$('.sec-head, .tile, .why__card, .sk-me, .sk-match, .rx-paper, .rx-stat, .campus, .journey, .edu-tile, .xp, .term-window, .ccard, .mailform');
     if (HOS.reduced() || !('IntersectionObserver' in window)) { HOS.countUp($('#bento')); return; }
     els.forEach((el) => el.classList.add('reveal'));
     const io = new IntersectionObserver((entries) => {
@@ -791,12 +865,14 @@
     renderOrbit();
     renderSkills();
     renderResearch();
+    renderEducation();
     renderExperience();
     renderContact();
     $('#print-cv').innerHTML = HOS.resumeHTML();
     HOS.fillIcons(document);
     HOS.applyTheme(document.documentElement.dataset.theme);
     bindEvents();
+    tiltCampus();
     scrollSpy();
     reveal();
     lazyTerminal();
