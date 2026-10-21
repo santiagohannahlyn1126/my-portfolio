@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
 
-  <link rel="stylesheet" href="css/styles.css?v=20261021d">
+  <link rel="stylesheet" href="css/styles.css?v=20261021g">
 
   <!-- Theme follows the visitor's device (like iOS) unless they picked one. Runs before paint. -->
   <script>
@@ -221,13 +221,29 @@
         <header class="sec-head sec-head--row">
           <div>
             <p class="eyebrow">Playground</p>
-            <h2 class="sec-title" id="play-title">Prefer the command line?</h2>
+            <h2 class="sec-title" id="play-title">Ask the portfolio.</h2>
           </div>
-          <p class="sec-lead">Type <code>help</code>, or try <code>sudo hire-hannah</code>.</p>
+          <p class="sec-lead">Click a question, or type a command and press Enter. No coding knowledge needed.</p>
         </header>
-        <div class="term-window">
-          <div class="term-window__bar" aria-hidden="true"><span></span><span></span><span></span><b>hannah — zsh</b></div>
-          <div class="term-window__body" id="terminal"></div>
+        <div class="play">
+          <aside class="qa" aria-label="Quick questions">
+            <p class="qa__title"><span data-icon="message"></span>Quick questions</p>
+            <div class="qa__list">
+            <button class="qa__btn" type="button" data-term-cmd="about"><span data-icon="user"></span><span class="qa__txt"><b>Who is Hannah?</b><code>about</code></span></button>
+            <button class="qa__btn" type="button" data-term-cmd="projects"><span data-icon="folder"></span><span class="qa__txt"><b>What has she built?</b><code>projects</code></span></button>
+            <button class="qa__btn" type="button" data-term-cmd="skills"><span data-icon="cpu"></span><span class="qa__txt"><b>What are her skills?</b><code>skills</code></span></button>
+            <button class="qa__btn" type="button" data-term-cmd="experience"><span data-icon="briefcase"></span><span class="qa__txt"><b>Where has she worked?</b><code>experience</code></span></button>
+            <button class="qa__btn" type="button" data-term-cmd="education"><span data-icon="cap"></span><span class="qa__txt"><b>Where did she study?</b><code>education</code></span></button>
+            <button class="qa__btn" type="button" data-term-cmd="research"><span data-icon="file"></span><span class="qa__txt"><b>What is her research?</b><code>research</code></span></button>
+            <button class="qa__btn" type="button" data-term-cmd="contact"><span data-icon="mail"></span><span class="qa__txt"><b>How can I reach her?</b><code>contact</code></span></button>
+            <button class="qa__btn" type="button" data-term-cmd="hire"><span data-icon="checkCircle"></span><span class="qa__txt"><b>Is she a good fit?</b><code>hire</code></span></button>
+            </div>
+            <p class="qa__hint">Want more? Type <code>help</code> in the console to see every command.</p>
+          </aside>
+          <div class="term-window">
+            <div class="term-window__bar" aria-hidden="true"><span></span><span></span><span></span><b>Portfolio console</b></div>
+            <div class="term-window__body" id="terminal"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -290,11 +306,11 @@
   <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
   <div class="tip" id="tip" role="tooltip" hidden></div>
 
-  <script src="js/data.js?v=20261021d" defer></script>
-  <script src="js/icons.js?v=20261021d" defer></script>
-  <script src="js/core.js?v=20261021d" defer></script>
-  <script src="js/resume.js?v=20261021d" defer></script>
-  <script src="js/terminal.js?v=20261021d" defer></script>
-  <script src="js/main.js?v=20261021d" defer></script>
+  <script src="js/data.js?v=20261021g" defer></script>
+  <script src="js/icons.js?v=20261021g" defer></script>
+  <script src="js/core.js?v=20261021g" defer></script>
+  <script src="js/resume.js?v=20261021g" defer></script>
+  <script src="js/terminal.js?v=20261021g" defer></script>
+  <script src="js/main.js?v=20261021g" defer></script>
 </body>
 </html>

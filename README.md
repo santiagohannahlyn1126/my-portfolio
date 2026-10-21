@@ -47,7 +47,8 @@ Without JavaScript the page falls back to a normal scrolling layout.
 - **Education:** USJ-R campus card (seal, campus photo, motto, 3D tilt) plus a clickable journey timeline. Edit it in `school` in `js/data.js`.
   The logo and photo are in `assets/img/usjr/`.
 - **Experience:** the READS Working Scholar role (Office of the Registrar), CpE Society and immersion work. `cv` holds the short résumé bullets.
-- **Playground:** an interactive terminal (`help`, `whoami`, `projects`, `skills`, `sudo hire-hannah`…)
+- **Playground:** "Ask the portfolio": plain-English quick-question buttons beside a clean console.
+  Commands: `help`, `about`, `summary`, `projects`, `skills`, `experience`, `education`, `research`, `contact`, `resume`, `hire`, `open <name|number>`.
 - **Contact:** an iOS contact card with quick actions, plus a mail compose form (opens the email app)
 - **Résumé:** the nav button opens a preview sheet. The PDF downloads in one tap, and Ctrl/Cmd+P prints a clean single page.
 - **Phones:** an iPhone-style bottom tab bar and bottom sheets you can swipe down to close

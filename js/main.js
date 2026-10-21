@@ -552,8 +552,11 @@
     $('#sk-match').innerHTML =
       '<header class="skm__head"><span class="tile__icon" data-tint="green">' + icon('checkCircle') + '</span>' +
         '<div><h3 id="skm-title">Does Hannah fit your stack?</h3><p>Pick your team\'s tools and see where I\'ve used them.</p></div></header>' +
+      '<div class="skm__body"><div class="skm__left">' +
+      '<p class="skm__label">Quick stacks</p>' +
       '<div class="skm__presets">' + PRESETS.map((p, i) =>
         '<button class="skm__preset" type="button" data-preset="' + i + '">' + icon(p.icon) + esc(p.name) + '</button>').join('') + '</div>' +
+      '<p class="skm__label">Or add your own</p>' +
       '<form class="skm__add" autocomplete="off">' +
         '<label class="sr-only" for="skm-q">Add a skill to your stack</label>' +
         '<input id="skm-q" list="skm-list" placeholder="Add a tool, e.g. Python">' +
@@ -561,7 +564,8 @@
         '<datalist id="skm-list">' + D.skills.map((s) => '<option value="' + esc(s.name) + '"></option>').join('') + '</datalist>' +
       '</form>' +
       '<div class="skm__tray" id="skm-tray"></div>' +
-      '<div class="skm__result" id="skm-result" aria-live="polite"></div>';
+      '</div>' +
+      '<div class="skm__result" id="skm-result" aria-live="polite"></div></div>';
     renderStack();
   }
 
@@ -581,7 +585,7 @@
 
     const out = $('#skm-result');
     if (!stack.length) {
-      out.innerHTML = '<div class="skm__empty">' + icon('layers') + '<span>Your stack shows up here. Try a preset above.</span></div>';
+      out.innerHTML = '<div class="skm__empty">' + icon('layers') + '<b>Your result shows up here</b><span>Pick a quick stack or add tools on the left.</span></div>';
       return;
     }
     const hands = stack.filter((id) => usedIn(id));
@@ -729,7 +733,11 @@
         '</header>' +
         '<div class="skill-grid">' + list.map(tile).join('') + '</div>' +
       '</section>';
-    }).join('') + '<div class="empty sk-empty" hidden>' + icon('search') + '<b>No skills match</b><span>Try another word, or clear the filters.</span>' +
+    }).join('') + '<div class="sk-pick" hidden>' + icon('grid') + '<b>Pick a skill category</b><span>Choose one to see those skills.</span>' +
+      '<div class="sk-pick__cats">' + D.skillCategories.map((c) =>
+        '<button class="sk-pick__cat" type="button" data-skill-cat="' + c.id + '"><span class="tile__icon" data-tint="' + CAT_TINT[c.id] + '">' + icon(c.icon) + '</span>' + esc(c.name) +
+        '<small>' + D.skills.filter((s) => s.cat === c.id).length + '</small></button>').join('') + '</div></div>' +
+      '<div class="empty sk-empty" hidden>' + icon('search') + '<b>No skills match</b><span>Try another word, or clear the filters.</span>' +
       '<button class="btn btn--tinted btn--sm" type="button" data-skill-reset>Clear filters</button></div>';
     HOS.fillIcons($('#skill-groups'));
     setSkillView(skillView);
@@ -758,12 +766,15 @@
         t.classList.toggle('is-dim', !ok); t.tabIndex = ok ? 0 : -1; if (ok) shown++;
       });
     } else {
+      const pick = skillCat === 'all' && !q;   // grid starts empty until a category (or a search) is chosen
       $$('.sk-card').forEach((card) => {
         let n = 0;
-        $$('.skill', card).forEach((t) => { const ok = match(t, card.dataset.cat); t.hidden = !ok; if (ok) n++; });
+        $$('.skill', card).forEach((t) => { const ok = !pick && match(t, card.dataset.cat); t.hidden = !ok; if (ok) n++; });
         card.hidden = !n; shown += n;
       });
-      $('.sk-empty').hidden = shown > 0;
+      $('.sk-pick').hidden = !pick;
+      $('.sk-empty').hidden = pick || shown > 0;
+      if (pick) { $('#skill-count').textContent = 'Pick a category above to see its skills'; return; }
     }
     const filtered = q || onlyUsed || skillCat !== 'all';
     $('#skill-count').textContent = filtered ? 'Showing ' + shown + ' of ' + D.skills.length + ' skills' : D.skills.length + ' skills across ' + D.skillCategories.length + ' categories';
@@ -1295,6 +1306,13 @@
       const pc = t.closest('[data-proj-scroll]');
       if (pc) { Car.step(+pc.dataset.projScroll); return; }
       if (t.closest('[data-pv-zoom]')) { lbOpen(); return; }
+      const tq = t.closest('[data-term-cmd]');
+      if (tq) {
+        const host = $('#terminal');
+        if (!host.dataset.ready) { host.dataset.ready = '1'; new HOS.Terminal(host); }
+        HOS.termInstance.typeAndRun(tq.dataset.termCmd);
+        return;
+      }
       const pvb = t.closest('[data-pv]');
       if (pvb) { pvShow(+pvb.dataset.pv); return; }
       const pvs = t.closest('[data-pv-step]');

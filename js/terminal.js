@@ -1,6 +1,6 @@
 /* ==========================================================================
-   HannahOS — Terminal
-   Commands · typing animation · ↑/↓ history · Tab autocomplete · easter eggs
+   HannahOS — Portfolio console (Playground)
+   Plain-English quick questions · typed commands · ↑/↓ history · Tab autocomplete
    ========================================================================== */
 
 (function () {
@@ -9,33 +9,37 @@
   const { esc } = HOS;
   const P = D.profile;
 
-  const PROMPT = '<span class="term__prompt">hannah@hannahos<i>:~$</i></span>';
+  const PROMPT = '<span class="term__prompt" aria-hidden="true">›</span>';
   const sleep = (ms) => new Promise((r) => setTimeout(r, HOS.reduced() ? 0 : ms));
 
-  const COMMANDS = {
-    help: 'List every command',
-    whoami: 'Who is Hannah?',
-    neofetch: 'System info banner',
-    skills: 'Languages, frameworks and tools',
-    projects: 'All 9 projects',
-    experience: 'Work history',
-    research: 'My approved undergraduate thesis',
-    contact: 'How to reach me',
-    resume: 'Open and download my résumé',
-    'sudo hire-hannah': 'Try it ;)',
-    open: 'open <section | project #>  e.g. open 1',
-    ls: 'List sections and files',
-    cat: 'cat <file>  e.g. cat bugs_i_fixed.txt',
-    theme: 'Toggle light / dark mode',
-    hr: 'Open the 1-page résumé',
-    date: 'Current time in Cebu City',
-    clear: 'Clear the screen',
-    exit: 'Try to leave'
-  };
-  /* "open <name>": scroll to a section or open a sheet */
+  /* Commands grouped for "help", each with a plain-English description */
+  const GROUPS = [
+    ['About Hannah', [
+      ['about', 'Who Hannah is and what she does'],
+      ['summary', 'Profile at a glance'],
+      ['projects', 'All ' + D.projects.length + ' projects'],
+      ['skills', 'Skills by category'],
+      ['experience', 'Work and leadership roles'],
+      ['education', 'Degree and school'],
+      ['research', 'Approved thesis abstract']
+    ]],
+    ['Get in touch', [
+      ['contact', 'Email and profile links'],
+      ['resume', 'Preview and download the résumé'],
+      ['hire', 'Run a quick hiring checklist']
+    ]],
+    ['Navigate', [
+      ['open <name>', 'Go to a section, e.g. open skills'],
+      ['open <number>', 'Open a project, e.g. open 1'],
+      ['theme', 'Switch light / dark mode'],
+      ['date', 'Current time in Cebu City'],
+      ['clear', 'Clear the console']
+    ]]
+  ];
+  /* Aliases: friendlier words and the old developer commands still work */
+  const ALIAS = { whoami: 'about', neofetch: 'summary', info: 'summary', cv: 'resume', hr: 'resume', email: 'contact', work: 'experience', jobs: 'experience', school: 'education', thesis: 'research', 'sudo': 'hire', ls: 'help', commands: 'help', '?': 'help', cls: 'clear' };
   const go = (id) => () => HOS.goto(id);
-  const APPS = { overview: go('overview'), about: go('overview'), projects: go('projects'), skills: go('skills'), experience: go('experience'), research: go('research'), education: go('education'), contact: go('contact'), resume: () => HOS.openResume(), bugs: () => HOS.openBugs() };
-  const CHIPS = ['help', 'whoami', 'projects', 'skills', 'contact', 'sudo hire-hannah'];
+  const APPS = { home: go('top'), overview: go('overview'), about: go('overview'), projects: go('projects'), skills: go('skills'), research: go('research'), education: go('education'), experience: go('experience'), contact: go('contact'), resume: () => HOS.openResume() };
 
   class Terminal {
     constructor(body) {
@@ -46,24 +50,22 @@
       const uid = 'ti-' + Math.random().toString(36).slice(2, 7);
       body.innerHTML =
         '<div class="term">' +
-          '<div class="term__out" role="log" aria-live="polite" aria-label="Terminal output">' +
+          '<div class="term__out" role="log" aria-live="polite" aria-label="Console output">' +
             '<div class="term__lines"></div>' +
             '<form class="term__input-row" autocomplete="off">' +
-              '<label class="term__prompt" for="' + uid + '">hannah@hannahos<i>:~$</i></label>' +
-              '<input class="term__input" id="' + uid + '" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" enterkeyhint="send" aria-describedby="' + uid + '-h">' +
+              '<label class="term__prompt" for="' + uid + '">›</label>' +
+              '<input class="term__input" id="' + uid + '" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" enterkeyhint="send" placeholder="Type a command, e.g. projects" aria-describedby="' + uid + '-h">' +
+              '<button class="term__send" type="submit" aria-label="Run command">Enter ↵</button>' +
               '<span class="sr-only" id="' + uid + '-h">Type a command and press Enter. Type help for the list. Tab completes, arrow keys browse history.</span>' +
             '</form>' +
-          '</div>' +
-          '<div class="term__chips" role="group" aria-label="Suggested commands">' +
-            CHIPS.map((c) => '<button class="term__chip" type="button" data-cmd="' + c + '">' + c + '</button>').join('') +
           '</div>' +
         '</div>';
       this.out = body.querySelector('.term__out');
       this.lines = body.querySelector('.term__lines');
       this.input = body.querySelector('.term__input');
-      this.focusEl = this.input;
       this.bind();
       this.intro();
+      HOS.termInstance = this;
     }
 
     bind() {
@@ -73,11 +75,7 @@
       this.out.addEventListener('click', (e) => {
         const link = e.target.closest('[data-term]');
         if (link) { this.typeAndRun(link.dataset.term); return; }
-        if (!window.getSelection().toString()) this.input.focus();
-      });
-      this.body.querySelector('.term__chips').addEventListener('click', (e) => {
-        const c = e.target.closest('[data-cmd]');
-        if (c) this.typeAndRun(c.dataset.cmd);
+        if (!window.getSelection().toString() && !e.target.closest('a, button')) this.input.focus();
       });
     }
 
@@ -92,7 +90,7 @@
         e.preventDefault();
         this.complete();
       } else if (e.key === 'Escape') {
-        e.stopPropagation();          // Esc clears the line instead of closing the window
+        e.stopPropagation();
         if (this.input.value) this.input.value = '';
         else this.input.blur();
       } else if (e.key === 'l' && e.ctrlKey) {
@@ -100,21 +98,18 @@
       }
     }
 
-    /** Tab completion over commands, app names, files and project numbers. */
+    /** Tab completion over commands and section names. */
     complete() {
-      const v = this.input.value.replace(/^\s+/, '');
-      const pool = Object.keys(COMMANDS)
-        .concat(Object.keys(APPS).map((a) => 'open ' + a))
-        .concat(['cat bugs_i_fixed.txt', 'theme light', 'theme dark']);
+      const v = this.input.value.replace(/^\s+/, '').toLowerCase();
+      const pool = GROUPS.flatMap((g) => g[1].map((c) => c[0])).filter((c) => c.indexOf('<') < 0)
+        .concat(Object.keys(APPS).map((a) => 'open ' + a)).concat(['help', 'theme light', 'theme dark']);
       const hits = pool.filter((c) => c.indexOf(v) === 0 && c !== v);
       if (hits.length === 1) this.input.value = hits[0];
       else if (hits.length > 1) {
-        // fill the common prefix, then list options
         let pre = hits[0];
         hits.forEach((h) => { while (h.indexOf(pre) !== 0) pre = pre.slice(0, -1); });
         this.input.value = pre;
-        this.echo(v);
-        this.print('<span class="t-mut">' + hits.map(esc).join('    ') + '</span>');
+        this.print('<span class="t-mut">Did you mean: </span>' + hits.map((h) => '<span class="t-link" data-term="' + esc(h) + '">' + esc(h) + '</span>').join('<span class="t-mut"> · </span>'));
       }
     }
 
@@ -127,35 +122,33 @@
       this.scroll();
       return el;
     }
-    echo(cmd) { this.print('<span class="term__row">' + PROMPT + '<span class="t-b">' + esc(cmd) + '</span></span>'); }
+    echo(cmd) { this.print('<span class="term__row">' + PROMPT + '<span class="t-b">' + esc(cmd) + '</span></span>', 'term__echo'); }
+    heading(text) { return '<span class="t-head">' + esc(text) + '</span>'; }
     scroll() { this.out.scrollTop = this.out.scrollHeight; }
-    /** Print lines one after another for a typed-out feel. */
     async printLines(list, delay) {
-      for (const l of list) { this.print(l); await sleep(delay === undefined ? 22 : delay); }
+      for (const l of list) { this.print(l); await sleep(delay === undefined ? 18 : delay); }
     }
 
-    /** Type a command into the prompt character by character, then run it. */
+    /** Type a command into the prompt, then run it (used by the quick-question buttons). */
     async typeAndRun(cmd) {
       if (this.busy) return;
       this.busy = true;
       this.input.value = '';
-      for (const ch of cmd) { this.input.value += ch; await sleep(32); }
-      await sleep(120);
+      for (const ch of cmd) { this.input.value += ch; await sleep(26); }
+      await sleep(100);
       this.busy = false;
       this.submit();
       if (!HOS.isMobile()) this.input.focus({ preventScroll: true });
     }
 
     async intro() {
-      this.busy = true;
-      await sleep(250);
-      for (const ch of 'neofetch') { this.input.value += ch; await sleep(45); }
-      await sleep(150);
-      this.input.value = '';
-      this.busy = false;
-      await this.run('neofetch', true);
-      this.print('');
-      this.print('<span class="t-mut">Type</span> <span class="t-acc">help</span> <span class="t-mut">to see commands, or tap a suggestion below.</span>');
+      await this.printLines([
+        this.heading('Welcome to Hannah\'s portfolio console'),
+        '<span class="t-mut">Ask about her projects, skills or experience. No technical knowledge needed.</span>',
+        '',
+        '<span class="t-mut">Pick a quick question, or type a command below and press Enter.</span>',
+        '<span class="t-mut">Good places to start:</span> <span class="t-link" data-term="about">about</span><span class="t-mut"> · </span><span class="t-link" data-term="projects">projects</span><span class="t-mut"> · </span><span class="t-link" data-term="help">help</span>'
+      ], 60);
     }
 
     submit() {
@@ -166,231 +159,192 @@
     }
 
     /* ---------- Commands ---------- */
-    async run(raw, silentEcho) {
-      if (!silentEcho || raw) this.echo(raw);
+    async run(raw) {
+      this.echo(raw);
       if (!raw) return;
       if (this.history[this.history.length - 1] !== raw) this.history.push(raw);
       this.hIndex = this.history.length;
-      const [cmd, ...rest] = raw.split(/\s+/);
-      const arg = rest.join(' ');
-      const c = cmd.toLowerCase();
+      const parts = raw.split(/\s+/);
+      let c = parts[0].toLowerCase();
+      const arg = parts.slice(1).join(' ');
+      c = ALIAS[c] || c;
 
       switch (c) {
-        case 'help': {
-          const w = Math.max.apply(null, Object.keys(COMMANDS).map((k) => k.length)) + 3;
-          await this.printLines(['<span class="t-b">Available commands</span>'].concat(Object.keys(COMMANDS).map((k) =>
-            '  <span class="t-link" data-term="' + (k === 'open' ? 'open 1' : k === 'cat' ? 'cat bugs_i_fixed.txt' : k) + '">' + esc(k) + '</span>' +
-            ' '.repeat(w - k.length) + '<span class="t-mut">' + esc(COMMANDS[k]) + '</span>')), 12);
+        case 'help':
+          for (const g of GROUPS) {
+            this.print(this.heading(g[0]));
+            await this.printLines(g[1].map((x) => {
+              const cmd = x[0].replace('<name>', 'skills').replace('<number>', '1');
+              return '  <span class="t-link t-cmd" data-term="' + esc(cmd) + '">' + esc(x[0]) + '</span><span class="t-desc">' + esc(x[1]) + '</span>';
+            }), 10);
+            this.print('');
+          }
+          this.print('<span class="t-mut">Tip: click any command to run it. Press Tab to complete, ↑ / ↓ for history.</span>');
           break;
-        }
-        case 'whoami':
+
+        case 'about':
           await this.printLines([
-            '<span class="t-b">' + esc(P.name) + '</span>',
+            this.heading(P.name),
             '<span class="t-acc">' + esc(P.title) + '</span>',
-            '<span class="t-mut">' + esc(P.location) + '</span>',
+            '<span class="t-mut">' + esc(P.location) + ' · ' + esc(P.status) + '</span>',
             '',
             esc(P.about),
             '',
-            '<span class="t-vio">“' + esc(P.tagline) + '”</span>'
+            '<span class="t-mut">Next:</span> <span class="t-link" data-term="projects">projects</span><span class="t-mut"> · </span><span class="t-link" data-term="skills">skills</span><span class="t-mut"> · </span><span class="t-link" data-term="contact">contact</span>'
           ]);
           break;
-        case 'neofetch':
-          this.neofetch();
+
+        case 'summary': {
+          const sw = D.projects.filter((p) => p.cat === 'software').length;
+          const rows = [
+            ['Name', P.name],
+            ['Role', P.role],
+            ['Education', D.school.degree + ', ' + D.school.short],
+            ['Experience', '4 years as a READS Working Scholar'],
+            ['Focus', 'Embedded systems · Software · QA'],
+            ['Projects', D.projects.length + ' built (' + sw + ' software, ' + (D.projects.length - sw) + ' embedded)'],
+            ['Skills', D.skills.length + ' across ' + D.skillCategories.length + ' areas'],
+            ['Location', P.location + ' (UTC+8)'],
+            ['Status', P.status]
+          ];
+          this.print(this.heading('Profile at a glance'));
+          await this.printLines(rows.map((r) => '  <span class="t-key">' + esc(r[0]) + '</span>' + (r[0] === 'Status' ? '<span class="t-ok">' + esc(r[1]) + '</span>' : esc(r[1]))), 25);
           break;
-        case 'skills':
-          for (const cat of D.skillCategories) {
-            const items = D.skills.filter((s) => s.cat === cat.id).map((s) =>
-              '<span class="t-skill">' + (s.logo
-                ? '<img class="t-logo' + (s.dark ? ' is-dark' : '') + '" src="assets/icons/brands/' + s.logo + '.svg" alt="">'
-                : '<span class="t-acc">◆ </span>') + esc(s.name) + '</span>').join('');
-            this.print('<span class="t-vio">' + esc(cat.name.padEnd(20)) + '</span>');
-            this.print('  ' + items);
-            await sleep(40);
-          }
-          this.print('<span class="t-mut">Tip: open skills  → logos you can click to filter projects</span>');
-          break;
+        }
+
         case 'projects':
-          await this.printLines(['<span class="t-b">9 projects</span> <span class="t-mut">· click a name or type</span> <span class="t-acc">open &lt;#&gt;</span>']
-            .concat(D.projects.map((p, i) =>
-              '  <span class="t-mut">' + String(i + 1).padStart(2, '0') + '</span>  ' +
-              '<span class="' + (p.cat === 'software' ? 't-acc' : 't-vio') + '">[' + (p.cat === 'software' ? 'SW' : 'HW') + ']</span> ' +
-              '<span class="t-link" data-term="open ' + (i + 1) + '">' + esc(p.title) + '</span>' +
-              '\n      <span class="t-mut">' + esc(p.pitch) + '</span>')), 30);
+          this.print(this.heading(D.projects.length + ' projects') + ' <span class="t-mut">· click a name to open it</span>');
+          await this.printLines(D.projects.map((p, i) =>
+            '  <span class="t-num">' + String(i + 1).padStart(2, '0') + '</span>' +
+            '<span class="t-tag ' + (p.cat === 'software' ? 't-tag--sw' : 't-tag--hw') + '">' + (p.cat === 'software' ? 'Software' : 'Embedded') + '</span>' +
+            '<span class="t-link" data-term="open ' + (i + 1) + '">' + esc(p.title) + '</span>' +
+            '\n       <span class="t-mut">' + esc(p.pitch) + '</span>'), 26);
           break;
+
+        case 'skills':
+          this.print(this.heading(D.skills.length + ' skills in ' + D.skillCategories.length + ' areas'));
+          for (const cat of D.skillCategories) {
+            const items = D.skills.filter((s) => s.cat === cat.id).map((s) => esc(s.name)).join('<span class="t-mut"> · </span>');
+            this.print('  <span class="t-key">' + esc(cat.name) + '</span>' + items);
+            await sleep(30);
+          }
+          this.print('<span class="t-mut">See them visually:</span> <span class="t-link" data-term="open skills">open skills</span>');
+          break;
+
         case 'experience':
+          this.print(this.heading('Experience'));
           for (const j of D.experience) {
             await this.printLines([
-              '<span class="' + (j.status === 'ACTIVE' ? 't-ok' : 't-vio') + '">[' + j.status + ']</span> <span class="t-b">' + esc(j.role) + '</span> ' + (j.period ? '<span class="t-mut">· ' + esc(j.period) + '</span>' : ''),
-              '        <span class="t-mut">' + esc(j.org) + '</span>'
-            ].concat(j.points.map((p) => '        › ' + esc(p))).concat(['']), 18);
+              '  <span class="t-b">' + esc(j.role) + '</span>' + (j.period ? ' <span class="t-mut">· ' + esc(j.period) + '</span>' : ''),
+              '  <span class="t-mut">' + esc(j.org) + '</span>'
+            ].concat(j.points.slice(0, 4).map((p) => '   – ' + esc(p))).concat(['']), 16);
           }
+          this.print('<span class="t-mut">Full details:</span> <span class="t-link" data-term="open experience">open experience</span>');
           break;
+
+        case 'education': {
+          const S = D.school;
+          await this.printLines([
+            this.heading('Education'),
+            '  <span class="t-b">' + esc(S.degree) + '</span>',
+            '  <span class="t-mut">' + esc(S.name) + ' · ' + esc(S.city) + ' · ' + esc(S.years) + '</span>',
+            '  <span class="t-mut">Senior High: With High Honors · Academic Scholar</span>',
+            '',
+            '<span class="t-mut">More:</span> <span class="t-link" data-term="open education">open education</span>'
+          ]);
+          break;
+        }
+
         case 'research': {
           const R = D.research;
           await this.printLines([
-            '<span class="t-ok">[' + esc(R.status.toUpperCase()) + ']</span> <span class="t-b">' + esc(R.title) + '</span>',
-            '        <span class="t-mut">' + esc(R.kind) + ' · ' + esc(R.year) + '</span>', ''
-          ].concat(R.abstract.map((x) => '  ' + esc(x))).concat(['', '  <span class="t-mut">Keywords:</span> ' + R.keywords.map(esc).join(' · ')])
-            .concat(['', '<span class="t-mut">Tip: open research  → interactive findings</span>']), 18);
+            this.heading('Research · ' + R.status + ' ' + R.year),
+            '  <span class="t-b">' + esc(R.title) + '</span>',
+            '  <span class="t-mut">' + esc(R.kind) + '</span>',
+            ''
+          ].concat(R.abstract.map((x) => '  ' + esc(x))).concat(['', '  <span class="t-key">Keywords</span>' + R.keywords.map(esc).join('<span class="t-mut"> · </span>')]), 18);
           break;
         }
+
         case 'contact':
           await this.printLines([
-            '<span class="t-b">Let\'s talk.</span>',
-            '  email    <a class="t-link" href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>',
-            '  school   <a class="t-link" href="mailto:' + esc(P.schoolEmail) + '">' + esc(P.schoolEmail) + '</a>',
-            '  where    ' + esc(P.location) + ' <span class="t-mut">(UTC+8)</span>',
-            D.links.github ? '  github   <a class="t-link" href="' + esc(D.links.github) + '" target="_blank" rel="noopener">' + esc(D.links.github) + '</a>' : '  github   <span class="t-mut">coming soon</span>',
-            D.links.linkedin ? '  linkedin <a class="t-link" href="' + esc(D.links.linkedin) + '" target="_blank" rel="noopener">' + esc(D.links.linkedin) + '</a>' : '  linkedin <span class="t-mut">coming soon</span>',
-            D.links.facebook ? '  facebook <a class="t-link" href="' + esc(D.links.facebook) + '" target="_blank" rel="noopener">' + esc(D.links.facebook) + '</a>' : '',
-            '<span class="t-mut">Taking you to Contact…</span>'
-          ]);
-          await sleep(300);
-          HOS.goto('contact');
+            this.heading('Contact'),
+            '  <span class="t-key">Email</span><a class="t-link" href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>',
+            '  <span class="t-key">School email</span><a class="t-link" href="mailto:' + esc(P.schoolEmail) + '">' + esc(P.schoolEmail) + '</a>',
+            '  <span class="t-key">Location</span>' + esc(P.location) + ' <span class="t-mut">(UTC+8)</span>',
+            D.links.linkedin ? '  <span class="t-key">LinkedIn</span><a class="t-link" href="' + esc(D.links.linkedin) + '" target="_blank" rel="noopener">' + esc(D.links.linkedin.replace(/^https?:\/\/(www\.)?/, '')) + '</a>' : '',
+            D.links.github ? '  <span class="t-key">GitHub</span><a class="t-link" href="' + esc(D.links.github) + '" target="_blank" rel="noopener">' + esc(D.links.github.replace(/^https?:\/\/(www\.)?/, '')) + '</a>' : '',
+            '',
+            '<span class="t-mut">Send a message:</span> <span class="t-link" data-term="open contact">open contact</span>'
+          ].filter((l, i, a) => l !== '' || a[i - 1] !== ''));
           break;
+
         case 'resume':
-          this.print('<span class="t-ok">✓</span> Opening Résumé.pdf…  <a class="t-link" href="' + esc(D.links.resume) + '" download>download PDF</a>');
-          await sleep(300);
+          this.print('Opening the résumé… <span class="t-mut">or</span> <a class="t-link" href="' + esc(D.links.resume) + '" download>download the PDF</a>');
+          await sleep(250);
           HOS.openResume();
           break;
+
         case 'open': {
-          const n = parseInt(arg, 10);
+          const n = parseInt(arg, 10), key = arg.toLowerCase();
           if (n >= 1 && n <= D.projects.length) {
-            this.print('<span class="t-ok">✓</span> Opening ' + esc(D.projects[n - 1].title) + '…');
+            this.print('Opening <span class="t-b">' + esc(D.projects[n - 1].title) + '</span>…');
             HOS.openProject(D.projects[n - 1].id);
-          } else if (APPS[arg.toLowerCase()]) {
-            this.print('<span class="t-ok">✓</span> Opening ' + esc(arg) + '…');
-            APPS[arg.toLowerCase()]();
-          } else this.print('<span class="t-err">open: unknown target “' + esc(arg) + '”.</span> <span class="t-mut">Try: open 1 · open projects · open contact</span>');
+          } else if (APPS[key]) {
+            this.print('Going to <span class="t-b">' + esc(arg) + '</span>…');
+            await sleep(200);
+            APPS[key]();
+          } else {
+            this.print('<span class="t-err">Couldn’t find “' + esc(arg || '…') + '”.</span> <span class="t-mut">Try</span> <span class="t-link" data-term="open projects">open projects</span><span class="t-mut">, </span><span class="t-link" data-term="open skills">open skills</span> <span class="t-mut">or</span> <span class="t-link" data-term="open 1">open 1</span>');
+          }
           break;
         }
-        case 'ls':
-          this.print(['overview/', 'projects/', 'skills/', 'experience/', 'contact/', 'resume.pdf', 'bugs_i_fixed.txt']
-            .map((f) => '<span class="' + (f.endsWith('/') ? 't-vio' : 't-acc') + '">' + f + '</span>').join('   '));
-          break;
-        case 'cat':
-          if (/bugs/.test(arg)) {
-            await this.printLines(D.bugs.map((b) =>
-              '<span class="' + (b[0] === 'FIXED' ? 't-ok' : b[0] === 'OPEN' ? 't-err' : 't-warn') + '">' + b[0].padEnd(8) + '</span>' +
-              '<span class="t-mut">' + b[1] + '</span>  ' + esc(b[2])), 40);
-          } else if (/excuses/.test(arg)) this.print('<span class="t-mut">(empty) No excuses. Only fixes.</span>');
-          else this.print('<span class="t-err">cat: ' + esc(arg || '<file>') + ': No such file.</span> <span class="t-mut">Try: cat bugs_i_fixed.txt</span>');
-          break;
+
         case 'theme':
-          if (arg === 'light' || arg === 'dark') HOS.applyTheme(arg); else HOS.toggleTheme();
-          this.print('<span class="t-ok">✓</span> Theme set to ' + document.documentElement.dataset.theme + '.');
+          if (arg === 'light' || arg === 'dark') HOS.applyTheme(arg, true); else HOS.toggleTheme();
+          this.print('Theme set to <span class="t-b">' + document.documentElement.dataset.theme + '</span>.');
           break;
-        case 'hr':
-          this.print('<span class="t-ok">✓</span> Opening the 1-page résumé…');
-          await sleep(300);
-          HOS.openResume();
-          break;
+
         case 'date':
-          this.print(new Intl.DateTimeFormat('en-US', { timeZone: P.timezone, dateStyle: 'full', timeStyle: 'short' }).format(new Date()) + ' <span class="t-mut">(Cebu City)</span>');
+          this.print(new Intl.DateTimeFormat('en-US', { timeZone: P.timezone, dateStyle: 'full', timeStyle: 'short' }).format(new Date()) + ' <span class="t-mut">· Cebu City</span>');
           break;
-        case 'echo':
-          this.print(esc(arg));
-          break;
+
         case 'clear':
           this.lines.innerHTML = '';
           break;
-        case 'exit':
-          this.print('<span class="t-mut">Nice try. This terminal lives on the page. Type</span> <span class="t-link" data-term="contact">contact</span> <span class="t-mut">instead.</span>');
+
+        case 'hire':
+          await this.hire();
           break;
-        case 'sudo':
-          if (/^hire[-\s]?hannah$/i.test(arg)) await this.hire();
-          else this.print('<span class="t-err">hannah is not in the sudoers file for “' + esc(arg) + '”.</span> <span class="t-mut">Only </span><span class="t-link" data-term="sudo hire-hannah">sudo hire-hannah</span><span class="t-mut"> is allowed.</span>');
+
+        case 'hello': case 'hi': case 'hey':
+          this.print('Hello, and thanks for visiting. Try <span class="t-link" data-term="about">about</span> or <span class="t-link" data-term="projects">projects</span>.');
           break;
-        case 'rm':
-          this.print('<span class="t-err">Permission denied.</span> <span class="t-mut">Bugs go in the Recycle Bin, not the projects.</span>');
-          break;
-        case 'hello': case 'hi':
-          this.print('Hi there! 👋 Try <span class="t-link" data-term="whoami">whoami</span>.');
-          break;
+
         default:
-          this.print('<span class="t-err">command not found: ' + esc(cmd) + '</span>  <span class="t-mut">Type</span> <span class="t-link" data-term="help">help</span>');
+          this.print('<span class="t-err">“' + esc(parts[0]) + '” isn’t a command.</span> <span class="t-mut">Type</span> <span class="t-link" data-term="help">help</span> <span class="t-mut">to see everything you can ask.</span>');
       }
     }
 
-    neofetch() {
-      const art = [
-        '    ┃ ┃ ┃ ┃ ┃',
-        '  ┏━┻━┻━┻━┻━┻━┓',
-        ' ━┫           ┣━',
-        ' ━┫  ██  ██   ┣━',
-        ' ━┫  ██████   ┣━',
-        ' ━┫  ██  ██   ┣━',
-        ' ━┫           ┣━',
-        '  ┗━┳━┳━┳━┳━┳━┛',
-        '    ┃ ┃ ┃ ┃ ┃'
-      ].join('\n');
-      const sw = D.projects.filter((p) => p.cat === 'software').length;
-      const rows = [
-        ['OS', 'HannahOS 2026.10 (Computer Engineering)'],
-        ['Host', 'University of San Jose–Recoletos'],
-        ['Location', 'Cebu City, PH (UTC+8)'],
-        ['Uptime', '4 years as a READS Working Scholar'],
-        ['Focus', 'Embedded · Software · QA'],
-        ['Projects', D.projects.length + ' built (' + sw + ' software, ' + (D.projects.length - sw) + ' embedded)'],
-        ['Stack', 'C · C# · TypeScript · React · .NET MAUI · ESP32 · VHDL'],
-        ['Status', '<span class="t-ok">● Available for opportunities</span>']
-      ];
-      const info =
-        '<span class="t-acc t-b">hannah</span><span class="t-mut">@</span><span class="t-vio t-b">hannahos</span>\n' +
-        '<span class="t-mut">────────────────────────</span>\n' +
-        rows.map((r) => '<span class="t-acc">' + r[0].padEnd(10) + '</span>' + (r[0] === 'Status' ? r[1] : esc(r[1]))).join('\n') +
-        '<div class="neo__swatches">' + ['#2ee6d6', '#9d8cff', '#3ddc97', '#fbbf24', '#ff7a8a', '#60a5fa', '#e8eef7'].map((c) => '<span style="background:' + c + '"></span>').join('') + '</div>';
-      this.print('<div class="neo"><pre class="neo__art" aria-hidden="true">' + art + '</pre><div class="neo__info">' + info + '</div></div>');
-    }
-
+    /** A short, professional "hiring checklist" (replaces the old sudo joke). */
     async hire() {
       this.busy = true;
-      const pw = this.print('[sudo] password for recruiter: ');
-      for (let i = 0; i < 8; i++) { pw.innerHTML += '•'; await sleep(55); }
-      await sleep(200);
-      await this.printLines([
-        '<span class="t-ok">✓ Access granted.</span> Excellent decision.',
-        '<span class="t-mut">Running pre-hire checks…</span>'
-      ], 200);
+      this.print(this.heading('Hiring checklist'));
       const checks = [
-        ['Embedded systems (ESP32, PIC, FPGA)', 'PASS'],
-        ['Software (web, desktop, mobile)', 'PASS'],
-        ['QA mindset', 'PASS'],
-        ['Reliability (4 yrs working scholar)', 'PASS'],
-        ['Communication', 'PASS']
+        ['Embedded systems (ESP32, PIC, FPGA, PCB)', 'Yes'],
+        ['Software (web, desktop, mobile)', 'Yes'],
+        ['QA and validation mindset', 'Yes'],
+        ['Reliability (4 years as a working scholar)', 'Yes'],
+        ['Client communication', 'Yes'],
+        ['Available for opportunities', 'Yes']
       ];
       for (const c of checks) {
-        this.print('  <span class="t-ok">✓</span> ' + esc(c[0].padEnd(40, '.')) + ' <span class="t-ok">' + c[1] + '</span>');
-        await sleep(170);
+        this.print('  <span class="t-check">' + esc(c[0]) + '</span><span class="t-ok t-b">' + c[1] + '</span>');
+        await sleep(140);
       }
-      const bar = this.print('Deploying Hannah to your team  <span class="term__bar"><span></span></span> <span class="t-acc pct">0%</span>');
-      const fill = bar.querySelector('.term__bar span'), pct = bar.querySelector('.pct');
-      requestAnimationFrame(() => { fill.style.width = '100%'; });
-      for (let p = 0; p <= 100; p += 10) { pct.textContent = p + '%'; await sleep(130); }
       this.print('');
-      this.print('<span class="t-ok t-b">🎉 Hire request compiled with 0 errors and 0 warnings.</span>');
-      this.print('Next step: <a class="t-link" href="mailto:' + esc(P.email) + '?subject=' + encodeURIComponent("Let's talk, Hannah") + '">' + esc(P.email) + '</a>');
-      this.print('  → <span class="t-link" data-term="contact">open Contact.mail</span>   → <a class="t-link" href="' + esc(D.links.resume) + '" download>download résumé</a>');
+      this.print('<span class="t-b">All checks passed.</span> <span class="t-mut">Next step:</span> <a class="t-link" href="mailto:' + esc(P.email) + '?subject=' + encodeURIComponent('Opportunity for Hannah') + '">email Hannah</a><span class="t-mut"> · </span><a class="t-link" href="' + esc(D.links.resume) + '" download>download résumé</a>');
       this.busy = false;
-      this.confetti();
-    }
-
-    confetti() {
-      if (HOS.reduced()) return;
-      const host = this.body.querySelector('.term');
-      host.style.position = 'relative';
-      const colors = ['#2ee6d6', '#9d8cff', '#3ddc97', '#fbbf24', '#ff7a8a'];
-      for (let i = 0; i < 46; i++) {
-        const s = document.createElement('i');
-        const size = 5 + Math.random() * 5;
-        s.style.cssText = 'position:absolute;left:50%;top:60%;width:' + size + 'px;height:' + size * 0.45 + 'px;border-radius:1px;pointer-events:none;background:' + colors[i % 5];
-        host.appendChild(s);
-        const a = Math.random() * Math.PI * 2, v = 120 + Math.random() * 220;
-        s.animate([
-          { transform: 'translate(-50%,-50%) rotate(0)', opacity: 1 },
-          { transform: 'translate(' + Math.cos(a) * v + 'px,' + (Math.sin(a) * v - 120) + 'px) rotate(' + (Math.random() * 720) + 'deg)', opacity: 0 }
-        ], { duration: 1100 + Math.random() * 600, easing: 'cubic-bezier(.2,.7,.3,1)' }).onfinish = () => s.remove();
-      }
     }
   }
 
