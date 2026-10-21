@@ -104,6 +104,30 @@
     $((on ? '.why__back' : '.why__front') + ' [data-why-flip]', card).focus({ preventScroll: true });
   }
 
+  /** Endless logo strip: slides left on its own, pauses while hovered or focused. */
+  function initMarquee() {
+    const box = $('#ov-marquee'), track = $('.marquee__track', box);
+    if (!track) return;
+    const SPEED = 32;                                 // pixels per second
+    let x = 0, paused = false, live = true, last = performance.now();
+    const frame = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (live && !paused) {
+        const half = track.scrollWidth / 2;
+        x -= SPEED * dt;
+        if (half && -x >= half) x += half;
+        track.style.transform = 'translate3d(' + x.toFixed(2) + 'px,0,0)';
+      }
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+    box.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') paused = true; });
+    box.addEventListener('pointerleave', () => { paused = false; });
+    box.addEventListener('focusin', () => { paused = true; });
+    box.addEventListener('focusout', () => { paused = false; });
+    if ('IntersectionObserver' in window) new IntersectionObserver((en) => { live = en[0].isIntersecting; }).observe(box);
+  }
+
   /** "Right now I'm …" typewriter (just swaps the text when motion is reduced). */
   function typer() {
     const el = $('#typer'), words = P.doing;
@@ -1042,6 +1066,7 @@
     bindEvents();
     tiltCampus();
     typer();
+    initMarquee();
     spotlight();
     scrollSpy();
     reveal();

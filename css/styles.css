@@ -1010,8 +1010,8 @@ button.tag:hover { background: var(--fill-2); }
   margin-top: 16px; padding: 4px 0; overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
-.marquee__track { display: flex; gap: 10px; width: max-content; padding-right: 10px; animation: marquee 60s linear infinite; }
-.marquee:hover .marquee__track, .marquee:focus-within .marquee__track { animation-play-state: paused; }
+/* Slid by JS (initMarquee) so it keeps moving even when the OS turns animations off; pauses on hover / focus */
+.marquee__track { display: flex; gap: 10px; width: max-content; padding-right: 10px; will-change: transform; }
 .mq {
   display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 16px 0 10px; border-radius: 999px; flex: none;
   background: var(--card); box-shadow: var(--shadow); font-size: 14px; font-weight: 500; white-space: nowrap; transition: transform 0.25s var(--spring);
@@ -1019,7 +1019,6 @@ button.tag:hover { background: var(--fill-2); }
 .mq:hover { transform: translateY(-2px); }
 .mq img, .mq .logo-glyph { width: 22px !important; height: 22px !important; }
 .mq.is-dark img { background: var(--logo-dark-tile); border-radius: 5px; padding: 2px; }
-@keyframes marquee { to { transform: translateX(-50%); } }
 
 /* "Why hire me": flip cards (front = claim, back = proof + jump link) */
 .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
@@ -1063,8 +1062,6 @@ button.tag:hover { background: var(--fill-2); }
   .why__face { padding: 22px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .marquee { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
-  .marquee__track { animation: none; }
 }
 
 /* Cursor-following glow on cards */
