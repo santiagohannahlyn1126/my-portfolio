@@ -2133,6 +2133,34 @@ html.paged .play .term-window__body { height: auto; min-height: 0; }
 .sk-main .sk-bar .sk-view { height: 46px; padding: 4px; box-sizing: border-box; align-items: stretch; }
 .sk-main .sk-bar .sk-view .seg__btn { min-height: 0; height: 38px; }
 
+/* Console layout: aligned columns and hanging indents (no space-padding) */
+.term__line:has(> .t-kv, > .t-proj, > .t-bul, > .t-blk) { white-space: normal; }
+.t-kv { display: grid; grid-template-columns: 150px minmax(0, 1fr); column-gap: 16px; padding: 1px 0 1px 16px; }
+.t-k { color: #8b949e; }
+.t-kv .t-link { justify-self: start; }
+.t-kv--check { grid-template-columns: minmax(0, 360px) auto; }
+.t-kv--check .t-k { color: #d4deeb; }
+.t-proj { display: grid; grid-template-columns: 28px 88px minmax(0, 1fr); column-gap: 10px; align-items: baseline; padding: 4px 0 4px 16px; }
+.t-proj .t-num { width: auto; }
+.t-proj .t-tag { margin: 0; justify-self: start; }
+.t-pbody { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.t-pbody .t-link { align-self: flex-start; }
+.t-pdesc { color: #8b949e; line-height: 1.5; }
+.t-bul { display: grid; grid-template-columns: 14px minmax(0, 1fr); column-gap: 6px; padding: 1px 0 1px 30px; color: #c9d1d9; }
+.t-dot { color: #5ac8fa; }
+.t-blk { padding: 2px 0 2px 16px; }
+.t-blk + .t-blk { margin-top: 6px; }
+.t-head + .t-kv, .term__line:has(.t-head) + .term__line .t-kv { margin-top: 2px; }
+@media (max-width: 767px) {
+  .t-kv { grid-template-columns: 100px minmax(0, 1fr); column-gap: 10px; padding-left: 4px; }
+  .t-kv--check { grid-template-columns: minmax(0, 1fr) auto; }
+  .t-proj { grid-template-columns: 22px minmax(0, 1fr); padding-left: 4px; }
+  .t-proj .t-tag { grid-column: 2; grid-row: 1; margin-bottom: 4px; }
+  .t-proj .t-pbody { grid-column: 2; }
+  .t-bul { padding-left: 12px; }
+  .t-blk { padding-left: 4px; }
+}
+
 /* 12. MOTION -------------------------------------------------------------- */
 .reveal { transform: translateY(32px); transition: transform 0.9s var(--ease); }
 .reveal.is-in { transform: none; }

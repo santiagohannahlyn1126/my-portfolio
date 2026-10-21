@@ -124,6 +124,12 @@
     }
     echo(cmd) { this.print('<span class="term__row">' + PROMPT + '<span class="t-b">' + esc(cmd) + '</span></span>', 'term__echo'); }
     heading(text) { return '<span class="t-head">' + esc(text) + '</span>'; }
+    /** Two-column row: label | value (value wraps under itself). */
+    kv(label, value) { return '<div class="t-kv"><span class="t-k">' + label + '</span><span class="t-v">' + value + '</span></div>'; }
+    /** Bulleted line with a hanging indent. */
+    bullet(html) { return '<div class="t-bul"><span class="t-dot">•</span><span>' + html + '</span></div>'; }
+    /** Indented block (paragraphs, sub-lines). */
+    block(html) { return '<div class="t-blk">' + html + '</div>'; }
     scroll() { this.out.scrollTop = this.out.scrollHeight; }
     async printLines(list, delay) {
       for (const l of list) { this.print(l); await sleep(delay === undefined ? 18 : delay); }
@@ -175,7 +181,7 @@
             this.print(this.heading(g[0]));
             await this.printLines(g[1].map((x) => {
               const cmd = x[0].replace('<name>', 'skills').replace('<number>', '1');
-              return '  <span class="t-link t-cmd" data-term="' + esc(cmd) + '">' + esc(x[0]) + '</span><span class="t-desc">' + esc(x[1]) + '</span>';
+              return this.kv('<span class="t-link" data-term="' + esc(cmd) + '">' + esc(x[0]) + '</span>', '<span class="t-desc">' + esc(x[1]) + '</span>');
             }), 10);
             this.print('');
           }
@@ -208,24 +214,26 @@
             ['Status', P.status]
           ];
           this.print(this.heading('Profile at a glance'));
-          await this.printLines(rows.map((r) => '  <span class="t-key">' + esc(r[0]) + '</span>' + (r[0] === 'Status' ? '<span class="t-ok">' + esc(r[1]) + '</span>' : esc(r[1]))), 25);
+          await this.printLines(rows.map((r) => this.kv(esc(r[0]), r[0] === 'Status' ? '<span class="t-ok">' + esc(r[1]) + '</span>' : esc(r[1]))), 25);
           break;
         }
 
         case 'projects':
           this.print(this.heading(D.projects.length + ' projects') + ' <span class="t-mut">· click a name to open it</span>');
           await this.printLines(D.projects.map((p, i) =>
-            '  <span class="t-num">' + String(i + 1).padStart(2, '0') + '</span>' +
-            '<span class="t-tag ' + (p.cat === 'software' ? 't-tag--sw' : 't-tag--hw') + '">' + (p.cat === 'software' ? 'Software' : 'Embedded') + '</span>' +
-            '<span class="t-link" data-term="open ' + (i + 1) + '">' + esc(p.title) + '</span>' +
-            '\n       <span class="t-mut">' + esc(p.pitch) + '</span>'), 26);
+            '<div class="t-proj">' +
+              '<span class="t-num">' + String(i + 1).padStart(2, '0') + '</span>' +
+              '<span class="t-tag ' + (p.cat === 'software' ? 't-tag--sw' : 't-tag--hw') + '">' + (p.cat === 'software' ? 'Software' : 'Embedded') + '</span>' +
+              '<span class="t-pbody"><span class="t-link" data-term="open ' + (i + 1) + '">' + esc(p.title) + '</span>' +
+              '<span class="t-pdesc">' + esc(p.pitch) + '</span></span>' +
+            '</div>'), 26);
           break;
 
         case 'skills':
           this.print(this.heading(D.skills.length + ' skills in ' + D.skillCategories.length + ' areas'));
           for (const cat of D.skillCategories) {
             const items = D.skills.filter((s) => s.cat === cat.id).map((s) => esc(s.name)).join('<span class="t-mut"> · </span>');
-            this.print('  <span class="t-key">' + esc(cat.name) + '</span>' + items);
+            this.print(this.kv(esc(cat.name), items));
             await sleep(30);
           }
           this.print('<span class="t-mut">See them visually:</span> <span class="t-link" data-term="open skills">open skills</span>');
@@ -235,9 +243,9 @@
           this.print(this.heading('Experience'));
           for (const j of D.experience) {
             await this.printLines([
-              '  <span class="t-b">' + esc(j.role) + '</span>' + (j.period ? ' <span class="t-mut">· ' + esc(j.period) + '</span>' : ''),
-              '  <span class="t-mut">' + esc(j.org) + '</span>'
-            ].concat(j.points.slice(0, 4).map((p) => '   – ' + esc(p))).concat(['']), 16);
+              this.block('<span class="t-b">' + esc(j.role) + '</span>' + (j.period ? ' <span class="t-mut">· ' + esc(j.period) + '</span>' : '') +
+                '<br><span class="t-mut">' + esc(j.org) + '</span>')
+            ].concat(j.points.slice(0, 4).map((p) => this.bullet(esc(p)))).concat(['']), 16);
           }
           this.print('<span class="t-mut">Full details:</span> <span class="t-link" data-term="open experience">open experience</span>');
           break;
@@ -246,9 +254,10 @@
           const S = D.school;
           await this.printLines([
             this.heading('Education'),
-            '  <span class="t-b">' + esc(S.degree) + '</span>',
-            '  <span class="t-mut">' + esc(S.name) + ' · ' + esc(S.city) + ' · ' + esc(S.years) + '</span>',
-            '  <span class="t-mut">Senior High: With High Honors · Academic Scholar</span>',
+            this.kv('Degree', '<span class="t-b">' + esc(S.degree) + '</span>'),
+            this.kv('School', esc(S.name)),
+            this.kv('Years', esc(S.years) + ' <span class="t-mut">· ' + esc(S.city) + '</span>'),
+            this.kv('Senior High', 'With High Honors · Academic Scholar'),
             '',
             '<span class="t-mut">More:</span> <span class="t-link" data-term="open education">open education</span>'
           ]);
@@ -259,21 +268,20 @@
           const R = D.research;
           await this.printLines([
             this.heading('Research · ' + R.status + ' ' + R.year),
-            '  <span class="t-b">' + esc(R.title) + '</span>',
-            '  <span class="t-mut">' + esc(R.kind) + '</span>',
+            this.block('<span class="t-b">' + esc(R.title) + '</span><br><span class="t-mut">' + esc(R.kind) + '</span>'),
             ''
-          ].concat(R.abstract.map((x) => '  ' + esc(x))).concat(['', '  <span class="t-key">Keywords</span>' + R.keywords.map(esc).join('<span class="t-mut"> · </span>')]), 18);
+          ].concat(R.abstract.map((x) => this.block(esc(x), 't-para'))).concat(['', this.kv('Keywords', R.keywords.map(esc).join('<span class="t-mut"> · </span>'))]), 18);
           break;
         }
 
         case 'contact':
           await this.printLines([
             this.heading('Contact'),
-            '  <span class="t-key">Email</span><a class="t-link" href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>',
-            '  <span class="t-key">School email</span><a class="t-link" href="mailto:' + esc(P.schoolEmail) + '">' + esc(P.schoolEmail) + '</a>',
-            '  <span class="t-key">Location</span>' + esc(P.location) + ' <span class="t-mut">(UTC+8)</span>',
-            D.links.linkedin ? '  <span class="t-key">LinkedIn</span><a class="t-link" href="' + esc(D.links.linkedin) + '" target="_blank" rel="noopener">' + esc(D.links.linkedin.replace(/^https?:\/\/(www\.)?/, '')) + '</a>' : '',
-            D.links.github ? '  <span class="t-key">GitHub</span><a class="t-link" href="' + esc(D.links.github) + '" target="_blank" rel="noopener">' + esc(D.links.github.replace(/^https?:\/\/(www\.)?/, '')) + '</a>' : '',
+            this.kv('Email', '<a class="t-link" href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>'),
+            this.kv('School email', '<a class="t-link" href="mailto:' + esc(P.schoolEmail) + '">' + esc(P.schoolEmail) + '</a>'),
+            this.kv('Location', esc(P.location) + ' <span class="t-mut">(UTC+8)</span>'),
+            D.links.linkedin ? this.kv('LinkedIn', '<a class="t-link" href="' + esc(D.links.linkedin) + '" target="_blank" rel="noopener">' + esc(D.links.linkedin.replace(/^https?:\/\/(www\.)?/, '')) + '</a>') : '',
+            D.links.github ? this.kv('GitHub', '<a class="t-link" href="' + esc(D.links.github) + '" target="_blank" rel="noopener">' + esc(D.links.github.replace(/^https?:\/\/(www\.)?/, '')) + '</a>') : '',
             '',
             '<span class="t-mut">Send a message:</span> <span class="t-link" data-term="open contact">open contact</span>'
           ].filter((l, i, a) => l !== '' || a[i - 1] !== ''));
@@ -339,7 +347,7 @@
         ['Available for opportunities', 'Yes']
       ];
       for (const c of checks) {
-        this.print('  <span class="t-check">' + esc(c[0]) + '</span><span class="t-ok t-b">' + c[1] + '</span>');
+        this.print('<div class="t-kv t-kv--check"><span class="t-k">' + esc(c[0]) + '</span><span class="t-v t-ok t-b">' + c[1] + '</span></div>');
         await sleep(140);
       }
       this.print('');
