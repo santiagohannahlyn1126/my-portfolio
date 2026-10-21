@@ -62,6 +62,9 @@ window.HOS_DATA = {
       period: '2022 – 2026',
       status: 'ACTIVE',
       badge: 'Final term · 2026',
+      summary: 'The first face students, alumni and walk-in clients meet at the Office of the Registrar, and the go-to person when the office tech acts up.',
+      skills: ['communication', 'detail', 'multitasking', 'problem', 'time', 'windows', 'word', 'excel'],
+      focus: ['Front desk', 'Document requests', 'Records', 'Tech support'],
       points: [
         'Ran the front desk, welcoming and serving students, alumni and walk-in clients',
         'Assessed requests for transcripts, certifications and other school documents, checking requirements before processing',
@@ -82,14 +85,36 @@ window.HOS_DATA = {
       org: 'Computer Engineering Society',
       period: '2024 – 2025',
       status: 'DONE',
-      points: ['Managed public communications for the Computer Engineering Society']
+      summary: 'The voice of the Computer Engineering Society: kept members and the department informed about events, deadlines and announcements.',
+      skills: ['publiccomm', 'leadership', 'teamwork', 'time', 'communication', 'detail'],
+      focus: ['Announcements', 'Social media', 'Event coverage', 'Officer coordination'],
+      points: [
+        'Managed public communications for the Computer Engineering Society',
+        'Wrote and posted announcements, reminders and event updates for members',
+        'Prepared publication materials for society events and activities',
+        'Covered events and shared updates on the society’s official page',
+        'Coordinated with fellow officers on schedules, messaging and deadlines',
+        'Relayed department and society memos clearly to Computer Engineering students'
+      ],
+      cv: ['Managed public communications for the Computer Engineering Society']
     },
     {
       role: 'Immersion Program Facilitator',
       org: 'Senior High Immersion Program',
       period: '',                 // add dates when ready, e.g. '2023'
       status: 'DONE',
-      points: ['Taught Senior High students C programming and digital logic design']
+      summary: 'Brought engineering into the classroom: introduced Senior High students to programming and digital logic through hands-on sessions.',
+      skills: ['teaching', 'c', 'communication', 'adaptability', 'problem'],
+      focus: ['C programming', 'Digital logic', 'Hands-on activities', 'Mentoring'],
+      points: [
+        'Taught Senior High students C programming and digital logic design',
+        'Walked students through writing, compiling and debugging their first C programs',
+        'Explained logic gates, truth tables and Boolean expressions with step-by-step examples',
+        'Guided hands-on exercises and helped students who got stuck',
+        'Answered questions and adjusted explanations to each student’s pace',
+        'Showed what Computer Engineering looks like as a course and a career'
+      ],
+      cv: ['Taught Senior High students C programming and digital logic design']
     }
   ],
 

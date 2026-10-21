@@ -858,7 +858,7 @@
 
   function renderExperience() {
     $('#exp').innerHTML =
-      '<div class="xp-list" role="tablist" aria-label="Roles" aria-orientation="vertical">' + D.experience.map((j, i) =>
+      '<div class="xp-col"><div class="xp-list" role="tablist" aria-label="Roles" aria-orientation="vertical">' + D.experience.map((j, i) =>
         '<button class="xp-item" role="tab" type="button" id="xpt-' + i + '" data-xp="' + i + '" aria-controls="xp-detail" aria-selected="' + (i === xpSel) + '">' +
           '<span class="tile__icon" data-tint="' + XP_TINT[i % 3] + '">' + icon(XP_ICON[i % 3]) + '</span>' +
           '<span class="xp-item__txt"><b>' + esc(j.role) + '</b><small>' + esc(j.org) + '</small>' +
@@ -866,7 +866,7 @@
           (j.status === 'ACTIVE' ? '<span class="badge-now">' + esc(j.badge || 'Current') + '</span>' : '') +
           icon('next') +
         '</button>').join('') +
-      '</div>' +
+      '</div><aside class="xp-glance" id="xp-glance" aria-live="polite"></aside></div>' +
       '<article class="xp" id="xp-detail" role="tabpanel"></article>';
     renderXp();
   }
@@ -881,8 +881,15 @@
         '<div class="xp__top"><h3>' + esc(j.role) + '</h3>' +
           (j.status === 'ACTIVE' ? '<span class="badge-now">' + esc(j.badge || 'Current') + '</span>' : '') + '</div>' +
         '<p class="xp__org">' + esc(j.org) + (j.period ? ' · <span class="xp__period">' + esc(j.period) + '</span>' : '') + '</p>' +
+        (j.summary ? '<p class="xp__summary">' + esc(j.summary) + '</p>' : '') +
         '<ul class="xp__points">' + j.points.map((p, i) => '<li style="--i:' + i + '">' + esc(p) + '</li>').join('') + '</ul>' +
-      '</div>';
+        (j.focus ? '<div class="xp__focusrow"><h4>' + icon('layers') + 'Focus areas</h4><div class="tags">' + j.focus.map((f) => '<span class="tag tag--plain xp__focus">' + esc(f) + '</span>').join('') + '</div></div>' : '') +
+        '</div>';
+    $('#xp-glance').innerHTML = (j.skills || j.focus ? '<p class="xp-glance__title">' + icon('info') + 'At a glance · ' + esc(j.role) + '</p>' +
+          (j.skills ? '<div class="xp__group"><h4>' + icon('sparkles') + 'Skills used</h4><div class="tags">' + j.skills.map((id) => {
+            const k = HOS.skillById(id);
+            return k ? '<button class="tag' + (k.dark ? ' is-dark' : '') + '" type="button" data-skill-open="' + k.id + '">' + HOS.logo(k, { size: 16 }) + esc(k.name) + '</button>' : '';
+          }).join('') + '</div></div>' : '') : '');
     el.classList.remove('is-swap');
     void el.offsetWidth;
     el.classList.add('is-swap');

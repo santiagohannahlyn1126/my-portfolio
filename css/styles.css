@@ -1804,6 +1804,40 @@ html.paged .mailform textarea { min-height: 72px; height: 88px; }
   .sk-main .sk-tabs .seg__btn { padding: 0 4px; font-size: 12.5px; white-space: normal; line-height: 1.15; }
 }
 
+/* 11i. Experience details: summary + "at a glance" card under the role list */
+.xp-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.xp-glance { display: grid; gap: 14px; padding: 16px 18px; border-radius: var(--r-lg); background: var(--card-2); animation: rise 0.35s var(--ease) both; }
+:root[data-theme='dark'] .xp-glance { background: var(--card); }
+.xp-glance:empty { display: none; }
+.xp-glance__title { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-2); }
+.xp-glance__title .ico { width: 15px; height: 15px; color: var(--accent-text); }
+.xp-glance .tag { background: var(--card); }
+:root[data-theme='dark'] .xp-glance .tag { background: var(--card-2); }
+.xp-glance .tag { min-height: 28px; padding: 0 10px 0 7px; font-size: 12.5px; }
+.xp-glance .xp__group h4 { margin-bottom: 6px; }
+.exp .xp-item { padding: 12px 14px; gap: 12px; }
+.exp .xp-item .tile__icon { width: 36px; height: 36px; }
+.exp .xp-item__txt small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exp .xp-item__txt .xp-item__period { display: none; }
+.xp__focusrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--sep); }
+.xp__focusrow h4 { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.xp__focusrow h4 .ico { width: 14px; height: 14px; color: var(--accent-text); }
+.xp__focusrow .tags { gap: 6px; }
+.xp__focusrow .tag { min-height: 28px; font-size: 12.5px; }
+.exp .xp { padding: 24px 26px; }
+.exp .xp__points li { font-size: 14.5px; }
+.xp__summary { margin-top: 10px; font-size: 15.5px; line-height: 1.5; color: var(--text-2); }
+.exp .xp__points { margin-top: 14px; gap: 7px; }
+.exp .xp__points li { font-size: 15px; }
+.xp__extras { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--sep); }
+.xp__group h4 { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.xp__group h4 .ico { width: 14px; height: 14px; color: var(--accent-text); }
+.xp__group .tags { gap: 6px; }
+.xp__group .tag { min-height: 30px; font-size: 13px; background: var(--card); }
+:root[data-theme='dark'] .xp__group .tag { background: var(--card-2); }
+.xp__focus { background: color-mix(in srgb, var(--accent) 10%, transparent) !important; color: var(--accent-text); font-weight: 600; }
+@media (max-width: 767px) { .xp__extras { grid-template-columns: minmax(0, 1fr); } }
+
 /* 12. MOTION -------------------------------------------------------------- */
 .reveal { transform: translateY(32px); transition: transform 0.9s var(--ease); }
 .reveal.is-in { transform: none; }
