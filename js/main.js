@@ -359,7 +359,10 @@
     if (!p.shots) return '<figure class="pv pv--single"><img class="pv__img" src="' + thumb(p) + '" alt="' + esc(p.title) + ' illustration"></figure>';
     return '<figure class="pv">' +
         '<div class="pv__frame">' +
-          '<img class="pv__img" id="pv-img" src="assets/projects/' + p.id + '/' + p.shots[0][0] + '.webp" alt="' + esc(p.shots[0][1]) + '" decoding="async">' +
+          '<button class="pv__zoom" type="button" data-pv-zoom aria-label="View screenshot full screen">' +
+            '<img class="pv__img" id="pv-img" src="assets/projects/' + p.id + '/' + p.shots[0][0] + '.webp" alt="' + esc(p.shots[0][1]) + '" decoding="async">' +
+            '<span class="pv__expand">' + icon('maximize') + 'Click to enlarge</span>' +
+          '</button>' +
           '<button class="pv__nav pv__nav--prev" type="button" data-pv-step="-1" aria-label="Previous screenshot">' + icon('back') + '</button>' +
           '<button class="pv__nav pv__nav--next" type="button" data-pv-step="1" aria-label="Next screenshot">' + icon('next') + '</button>' +
           '<span class="pv__count" id="pv-count">1 / ' + p.shots.length + '</span>' +
@@ -387,6 +390,53 @@
     const th = $('[data-pv="' + pv.i + '"]');
     if (th) th.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (img.animate) img.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
+    if (lb && !lb.hidden) lbFill();
+  }
+
+  /* Full-screen screenshot viewer (lightbox) */
+  let lb = null;
+  function lbFill() {
+    const p = pv.p, s = p.shots[pv.i];
+    const img = $('.lb__img', lb);
+    img.src = 'assets/projects/' + p.id + '/' + s[0] + '.webp';
+    img.alt = s[1];
+    $('.lb__cap', lb).textContent = s[1];
+    $('.lb__count', lb).textContent = (pv.i + 1) + ' / ' + p.shots.length;
+    if (img.animate) img.animate([{ opacity: 0.5, transform: 'scale(0.985)' }, { opacity: 1, transform: 'none' }], { duration: 240, easing: 'ease-out' });
+  }
+  function lbOpen() {
+    if (!pv.p || !pv.p.shots) return;
+    if (!lb) {
+      lb = document.createElement('div');
+      lb.className = 'lb';
+      lb.hidden = true;
+      lb.setAttribute('role', 'dialog');
+      lb.setAttribute('aria-modal', 'true');
+      lb.setAttribute('aria-label', 'Screenshot viewer');
+      lb.innerHTML =
+        '<button class="lb__close" type="button" data-lb-close aria-label="Close full-screen view">' + icon('close') + '</button>' +
+        '<figure class="lb__fig"><img class="lb__img" alt=""><figcaption><span class="lb__count"></span><span class="lb__cap"></span></figcaption></figure>' +
+        '<button class="lb__nav lb__nav--prev" type="button" data-pv-step="-1" aria-label="Previous screenshot">' + icon('back') + '</button>' +
+        '<button class="lb__nav lb__nav--next" type="button" data-pv-step="1" aria-label="Next screenshot">' + icon('next') + '</button>';
+      document.body.appendChild(lb);
+      lb.addEventListener('click', (e) => { if (e.target === lb || e.target.closest('[data-lb-close]')) lbClose(); });
+      document.addEventListener('keydown', (e) => {
+        if (lb.hidden) return;
+        if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); lbClose(); }
+        else if (e.key === 'Tab') { e.preventDefault(); $('.lb__close', lb).focus(); }
+      }, true);
+    }
+    lbFill();
+    lb.hidden = false;
+    requestAnimationFrame(() => lb.classList.add('is-open'));
+    $('.lb__close', lb).focus();
+  }
+  function lbClose() {
+    if (!lb || lb.hidden) return;
+    lb.classList.remove('is-open');
+    lb.hidden = true;
+    const z = $('[data-pv-zoom]');
+    if (z) z.focus({ preventScroll: true });
   }
 
   function openProject(id) {
@@ -1244,6 +1294,7 @@
       if (ps) { Pager.step(+ps.dataset.pageStep); return; }
       const pc = t.closest('[data-proj-scroll]');
       if (pc) { Car.step(+pc.dataset.projScroll); return; }
+      if (t.closest('[data-pv-zoom]')) { lbOpen(); return; }
       const pvb = t.closest('[data-pv]');
       if (pvb) { pvShow(+pvb.dataset.pv); return; }
       const pvs = t.closest('[data-pv-step]');
