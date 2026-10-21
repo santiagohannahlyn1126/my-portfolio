@@ -2125,6 +2125,14 @@ html.paged .play .term-window__body { height: auto; min-height: 0; }
   .skm2__img { width: 110px; flex: none; aspect-ratio: auto; }
 }
 
+/* Skills toolbar: search / add box and view switch share one height and baseline */
+.sk-main .sk-bar { align-items: center; }
+.sk-main .sk-bar .sk-search { height: 46px; margin: 0; }
+.sk-main .sk-bar .sk-search input { height: 46px; min-height: 46px; box-sizing: border-box; }
+.sk-main .sk-bar .skm__add .btn { --h: 36px; right: 5px; }
+.sk-main .sk-bar .sk-view { height: 46px; padding: 4px; box-sizing: border-box; align-items: stretch; }
+.sk-main .sk-bar .sk-view .seg__btn { min-height: 0; height: 38px; }
+
 /* 12. MOTION -------------------------------------------------------------- */
 .reveal { transform: translateY(32px); transition: transform 0.9s var(--ease); }
 .reveal.is-in { transform: none; }
